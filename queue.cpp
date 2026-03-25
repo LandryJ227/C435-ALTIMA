@@ -1,4 +1,4 @@
-#include "task.h"
+#include "tcb.h"
 #include "queue.h"
 #include <iostream>
 using namespace std;
@@ -22,4 +22,9 @@ Task queue::dequeue() {
     else {
         cout << "ERROR: cannot dequeue from empty queue" << endl;
     }
+}
+
+bool queue::isEmpty() {
+    if (head == tail) return true;
+    else return false;
 }

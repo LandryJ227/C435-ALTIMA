@@ -1,6 +1,6 @@
 #include "semaphore.h"
 #include "queue.h"
-#include "task.h"
+#include "tcb.h"
 #include <iostream>
 using namespace std;
 
@@ -16,8 +16,13 @@ void semaphore::down(Task T) {
 }
 
 void semaphore::up() {
-    sema_value = 1;
-    //wake up next process
+    if (sema_queue->isEmpty()) {                    //check if queue is empty
+        sema_value = 1;                             //if it is, free the semaphore
+    }
+    else {
+        Task nextTask = sema_queue->dequeue();
+        //run this task next
+    }
 }
 
 void semaphore::dump (int level) {

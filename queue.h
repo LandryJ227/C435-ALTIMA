@@ -1,4 +1,4 @@
-#include "task.h"
+#include "tcb.h"
 
 class queue {
 public:
@@ -10,4 +10,5 @@ public:
 
     void enqueue(Task T);
     Task dequeue();
+    bool isEmpty();
 };

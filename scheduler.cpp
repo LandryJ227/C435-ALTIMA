@@ -37,6 +37,7 @@ int create_task() {
         next_available_task_id++;
         return(next_available_task_id - 1);
     }
+
     else {
         cout << "Create_task() FAILED: Available tasks exeeded. Max_TASKS = " << MAX_TASKS << endl;
         return (-1);

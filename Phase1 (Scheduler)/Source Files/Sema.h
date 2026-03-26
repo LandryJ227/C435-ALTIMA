@@ -1,4 +1,4 @@
-#include "queue.h"
+#include "Queue.h"
 #include "tcb.h"
 
 class semaphore {

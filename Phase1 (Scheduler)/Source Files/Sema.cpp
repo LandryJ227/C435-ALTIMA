@@ -1,11 +1,11 @@
 #include "Queue.h"
-<<<<<<< HEAD:semaphore.cpp
-
-=======
 #include "tcb.h"
 #include <iostream>
->>>>>>> refs/remotes/origin/main:Phase1 (Scheduler)/Source Files/semaphore.cppusing namespace std;
+
+
 using namespace std;
+
+
 
 class semaphore {
 
@@ -79,7 +79,12 @@ class semaphore {
         cout << "-----SEMAPHORE DUMP-------" << endl;
         switch(level) {
             case 0:
-                cout << "Sema_Value: " << sema_value << endl;
+                cout << "Sema_Value: " << sema_value <<<<<<< HEAD:s.cpp
+
+=======
+#include "tcb.h"
+#include <iostream>
+>>>>>>> refs/remotes/origin/main:Phase1 (Scheduler)/Source Files/semaphore.cpp<< endl;
                 cout << "Sema_Name : " << resource_name << endl;
                 cout << "Obtained by Task-ID " << lucky_task << endl;
                 break;

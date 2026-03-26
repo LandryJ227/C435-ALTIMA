@@ -1,5 +1,5 @@
 #include "tcb.h"
-#include "queue.h"
+#include "Queue.h"
 #include <iostream>
 using namespace std;
 

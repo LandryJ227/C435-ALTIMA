@@ -2,5 +2,9 @@
 
 - Phase 1 of the ULTIMA 2.0 Project consists of the creation of the Scheduler and Semaphore for our operating system. These
 components provide the operating system with the ability to manage processes/threads, synchronize shared resources (like the screen), 
-and see the tasks that are "running", "blocked", "ready", or "dead". The scheduler uses its own dynamic thread table (linked list of 
-Task Control Blocks (TCB)) to preserve these states and will be used to maintain other information in the future.
+and see the status of active processes/threads. A process/thread can have any of the 4 states: "running", "blocked", "ready", or "dead". 
+The process scheduler is displayed as a table that shows the following fields for all active tasks: Task Name, TaskID, State, etc.
+The scheduler uses its own dynamic thread table (linked list of Task Control Blocks (TCB)) to preserve these states and will be used to 
+maintain other information in the future.
+The binary semaphore implemented acts as a lock for shared resources where:     if (semaphore_value == 0), the resources are locked
+                                                                                if (sempahore_value == 1), resources are free to be used

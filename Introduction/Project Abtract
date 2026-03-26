@@ -1,1 +1,11 @@
+------------------------------------------------------  Project Abstract   -------------------------------------------------------------------
+                              (Summary of phase abstracts. After each phase this will be updated)
 
+After Phase 1:
+  Phase 1 of the ULTIMA 2.0 Project consists of the creation of the Scheduler and Semaphore aspects for our operating system. These
+components provide the operating system with the ability to manage processes/threads, synchronize shared resources (like the screen), 
+and see the tasks that are "running", "blocked", "ready", or "dead". The scheduler uses its own dynamic thread table (linked list of 
+Task Control Blocks (TCB)) to preserve these states and will be used to maintain other information in the future.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+After Phase 2:

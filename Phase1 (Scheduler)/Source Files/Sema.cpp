@@ -1,6 +1,7 @@
 #include "Queue.h"
 #include "tcb.h"
 #include <iostream>
+#include "Sema.h"
 
 
 using namespace std;
@@ -13,7 +14,7 @@ class semaphore {
     int sema_value;
     int lucky_task;
 
-    Queue<int> sema_queue;
+    queue<int> sema_queue;
     scheduler *sched_ptr;
 
     public:
@@ -79,24 +80,21 @@ class semaphore {
         cout << "-----SEMAPHORE DUMP-------" << endl;
         switch(level) {
             case 0:
-                cout << "Sema_Value: " << sema_value <<<<<<< HEAD:s.cpp
-
-=======
-#include "tcb.h"
-#include <iostream>
->>>>>>> refs/remotes/origin/main:Phase1 (Scheduler)/Source Files/semaphore.cpp<< endl;
+                cout << "Sema_Value: " << sema_value << endl;
                 cout << "Sema_Name : " << resource_name << endl;
-                cout << "Obtained by Task-ID " << lucky_task << endl;
+                cout << "Obtained by Task-ID: " << lucky_task<< endl;
                 break;
             case 1:
                 cout << "Sema_Value         : " << sema_value << endl;
                 cout << "Sema_Name          : " << resource_name << endl;
                 cout << "Obtained by Task-ID: " << lucky_task << endl;
+                cout << "Sema-Queue: " << endl;
                 sema_queue.Print();
                 break;
             default:
                 cout << "ERROR in SEMAPHORE DUMP level";
         }
-        cout << "------------------------" << endl;
+        cout << "---------------------------------------" << endl;
     }
-}
+};
+            

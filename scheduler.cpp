@@ -43,8 +43,58 @@ int create_task() {
         return (-1);
     }
 }
+void start() {
+    cout << ".........." << endl;
+    cout << "..........SCHEDULING STARTED" << endl;
+    cout << "..........\n" << endl;
+    task_table[0].start_time = clock();
+    task_table[0].state = RUNNING;
+    current_task = 0;
+    set_quantum(1000 / MAX_TASKS);
+    sleep(1);
+}
+void yield() {
+    int counter = 0;
+    cout << "Current Task # " << current_task << " is trying to Yield" << endl;
+    clock_t elapsed_time = clock() = task_table[current_task].start_time;
+    cout << "Task: " << current_task << ", Elapsed time: " << elapsed_time << endl;
+    cout << "Current Quantum: " << current_quantum << endl;
 
+    if (elapsed_time >= current_quantum) {
+        cout << "Yielding....(Switching from task #" << current_task << " to next ready task)" << endl;
+        if (task_table[current_task].state == RUNNING)
+            task_table[current_task].state = READY;
 
+        current_task = (current_task + 1) % MAX_TASKS;
+        while (task_table[current_task].state != READY && counter < MAX_TASKS -1 ) {
+            current_task = (current_task + 1) % MAX_TASKS;
+            counter ++;
+        }
+
+        if (counter < MAX_TASKS - 1 && task_table[current_task].state == READY) {
+            task_table[current_task].start_time = clock();
+            task_table[current_task].state = RUNNING;
+            cout << "Started Running Task #" << current_task << endl;
+        }
+        else {
+            cout << "POSSIBLE DEAD LOCK" << endl;
+        }
+    }
+    else cout << "NO Yield! (Task: " << current_task << " Still have some quantum left)" << endl;
+}
+void dump() {
+    cout << "------------ PROCESS TABLE ------------" << endl;
+    cout << "Quantum = " << current_quantum << endl;
+    cout << "Task-ID\t Elapsed Time\tState" <, endl;
+    for (int i=0; i < MAX_TASKS; i++) {
+        clock_t elapsed_time = clock() - task.table[i].start_time;
+        printf("%6\t%8d\t%s", task_table[i].task_id, elapsed_time, task_table[i].state.c_str() );
+        if (i == current_task)
+            cout << " <-- CURRENT PROCESS";
+        cout << endl;
+    }
+    cout << "----------------------------------------------------------------------\n" << endl;
+}
 
 
 

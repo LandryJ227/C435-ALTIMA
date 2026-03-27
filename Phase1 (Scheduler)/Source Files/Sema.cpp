@@ -1,9 +1,7 @@
 #include "Queue.h"
-#include "sched.h"
+#include "Sched.h"
 #include <iostream>
 #include "Sema.h"
-
-
 using namespace std;
 
 
@@ -11,25 +9,23 @@ string resource_name;
 int sema_value;
 int lucky_task;
 
-queue<int> sema_queue;
+Ultima_Queue sema_queue;
 scheduler *sched_ptr;
 
-public:
 
-semaphore(int starting_value, string name, scheduler *theScheduler) {
+semaphore::semaphore(int starting_value, string name, scheduler *theScheduler) {
     sema_value = starting_value;
     resource_name = name;
     lucky_task = -1;
-
     sched_ptr = theScheduler;
 }
 
-~semaphore() {
+semaphore::~semaphore() {
     //sema_queue.Reset();
     //pthread_mutex_destroy(&mutex);
 }
 
-void down(int taskID)
+void semaphore::down(int taskID)
 {
 
     if(taskID == lucky_task) {
@@ -48,7 +44,7 @@ void down(int taskID)
     }
 }
 
-void up()
+void semaphore::up()
 {
     int task_id;
     cout << "TaskID : " <<  sched_ptr -> get_task_id() << ", LuckID : " << lucky_task << endl;
@@ -60,7 +56,7 @@ void up()
             dump(1);
         }
         else {
-            task_id = sema_queue.De_Q();
+            task_id = sema_queue.dequeue();
             sched_ptr->set_state(task_id, READY);
             cout << "UnBlock  : " << task_id << " and release from the queue" << endl;
             lucky_task = task_id;
@@ -72,7 +68,7 @@ void up()
     }
 }
 
-void dump(int level)
+void semaphore::dump(int level)
 {
     cout << "-----SEMAPHORE DUMP-------" << endl;
     switch(level) {

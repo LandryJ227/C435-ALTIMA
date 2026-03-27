@@ -3,18 +3,18 @@
 #include <iostream>
 using namespace std;
 
-void queue::enqueue(Task T) {
+void Ultima_Queue::enqueue(int task) {
     if ((tail + 1) % QUEUE_SIZE != head) {
-        taskQueue[tail] = T;
+        taskQueue[tail] = task;
         tail = (tail + 1) % QUEUE_SIZE;
         numOfTasks++;
     }
     else cout << "ERROR: cannot enqueue into full queue" << endl;
 }
 
-Task queue::dequeue() {
+tcb Ultima_Queue::dequeue() {
     if (head != tail) {
-        Task tempTask = taskQueue[head];
+        int tempTask = taskQueue[head];
         head = (head + 1) % QUEUE_SIZE;
         numOfTasks--;
         return tempTask;
@@ -24,7 +24,7 @@ Task queue::dequeue() {
     }
 }
 
-bool queue::isEmpty() {
+bool Ultima_Queue::isEmpty() {
     if (head == tail) return true;
     else return false;
 }

@@ -1,5 +1,4 @@
 #include "Queue.h"
-#include "Sched.h"
 #include <iostream>
 using namespace std;
 
@@ -12,7 +11,7 @@ void Ultima_Queue::enqueue(int task) {
     else cout << "ERROR: cannot enqueue into full queue" << endl;
 }
 
-tcb Ultima_Queue::dequeue() {
+int Ultima_Queue::dequeue() {
     if (head != tail) {
         int tempTask = taskQueue[head];
         head = (head + 1) % QUEUE_SIZE;

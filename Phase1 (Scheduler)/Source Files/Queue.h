@@ -1,5 +1,4 @@
-class Ultima_Queue{
-private:
+class Ultima_Queue {
     static const int QUEUE_SIZE = 64;
     int taskQueue[QUEUE_SIZE];
     int numOfTasks=0;

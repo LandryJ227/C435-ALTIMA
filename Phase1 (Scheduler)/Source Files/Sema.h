@@ -1,5 +1,5 @@
 #include "Queue.h"
-#include "tcb.h"
+
 
 class semaphore {
     char resource_name [64];    // the name of the resource being managed

@@ -1,5 +1,3 @@
-#include "tcb.h"
-
 class queue {
 public:
     static const int QUEUE_SIZE = 64;

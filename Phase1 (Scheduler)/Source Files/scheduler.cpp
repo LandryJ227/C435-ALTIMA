@@ -1,38 +1,41 @@
 #include "scheduler.h"
 #include "tcb.h"
 #include <cstring>
+#include <string>
 #include <iostream>
+#include <unistd.h>
 using namespace std;
 
-scheduler() {
+scheduler::scheduler() {
     current_task = -1;
     next_available_task_id = 0;
     current_quantum = 300;
 }
-~scheduler() {
+scheduler::~scheduler() {
     cout << "Exiting scheduler..." << endl;
 }
-void set_quantum(long quantum) {
+void scheduler::set_quantum(long quantum) {
     current_quantum = quantum;
 }
-long get_quantum() {
+long scheduler::get_quantum() {
     return (current_quantum);
 }
-void set_state(int the_taskid, string the_state) {
+void scheduler::set_state(int the_taskid, string the_state) {
     task_table[the_taskid].state = the_state;
 }
-string get_state(int the_taskid) {
+string scheduler::get_state(int the_taskid) {
     return(task_table[the_taskid].state);
 }
-int get_task_id() {
+int scheduler::get_task_id() {
     return current_task;
 }
-int create_task() {
+/*
+int scheduler::create_task() {
     if (next_available_task_id < MAX_TASKS) {
         cout << "Creating task # " << next_available_task_id << endl;
         task_table[next_available_task_id].task_id = next_available_task_id;
-        task_table[next_availavle_task_id].state = READY;
-        task_table[next_availavle_task_id].next = NULL;
+        task_table[next_available_task_id].state = READY;
+        task_table[next_available_task_id].next = NULL;
 
         next_available_task_id++;
         return(next_available_task_id - 1);
@@ -42,8 +45,8 @@ int create_task() {
         cout << "Create_task() FAILED: Available tasks exeeded. Max_TASKS = " << MAX_TASKS << endl;
         return (-1);
     }
-}
-void start() {
+}*/
+void scheduler::start() {
     cout << ".........." << endl;
     cout << "..........SCHEDULING STARTED" << endl;
     cout << "..........\n" << endl;
@@ -53,10 +56,10 @@ void start() {
     set_quantum(1000 / MAX_TASKS);
     sleep(1);
 }
-void yield() {
+void scheduler::yield() {
     int counter = 0;
     cout << "Current Task # " << current_task << " is trying to Yield" << endl;
-    clock_t elapsed_time = clock() = task_table[current_task].start_time;
+    clock_t elapsed_time = clock() - task_table[current_task].start_time;
     cout << "Task: " << current_task << ", Elapsed time: " << elapsed_time << endl;
     cout << "Current Quantum: " << current_quantum << endl;
 
@@ -82,50 +85,46 @@ void yield() {
     }
     else cout << "NO Yield! (Task: " << current_task << " Still have some quantum left)" << endl;
 }
-void dump() {
-    cout << "------------ PROCESS TABLE ------------" << endl;
-    cout << "Quantum = " << current_quantum << endl;
-    cout << "Task-ID\t Elapsed Time\tState" <, endl;
-    for (int i=0; i < MAX_TASKS; i++) {
-        clock_t elapsed_time = clock() - task.table[i].start_time;
-        printf("%6\t%8d\t%s", task_table[i].task_id, elapsed_time, task_table[i].state.c_str() );
-        if (i == current_task)
-            cout << " <-- CURRENT PROCESS";
-        cout << endl;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int scheduler::create_task(string name) {
+    cout << "Entering createTask()" << endl;
+
+    tcb* newTask = new tcb();
+    newTask->taskName = name;            //set name of task
+    newTask->state = "BLOCKED";//change later?
+    newTask->task_id = numOfTasks++;              //inc total number of tasks
+
+    if (process_table == nullptr) {
+        process_table = newTask;
+        cout << "Exiting createTask(), returning taskID = " << newTask->task_id << endl;
+        return newTask->task_id;
     }
-    cout << "----------------------------------------------------------------------\n" << endl;
-}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-int scheduler::createTask(char name[64]) {
-    Task newTask;
-    strcpy(newTask.taskName,  name);
-    strcpy(newTask.taskState, "BLOCKED");
-    newTask.taskID = numOfTasks++;
-
-    TCB ptrTCB = process_table;
-    while (ptrTCB.next != null) {
-        ptrTCB = ptrTCB.next;
+    tcb* ptrTCB = process_table;                 //point to front of process table
+    while (ptrTCB->next != nullptr) {               //traverse until we find the end
+        ptrTCB = ptrTCB->next;
     }
-    ptrTCB.next = newTask;
+    ptrTCB->next = newTask;                      //add this new task to the end of process list
 
-    return newTask.taskID;
+    cout << "Exiting createTask(), returning taskID = " << newTask->task_id << endl;
+    return newTask->task_id;                      //return the task id
 }
-
+/*
 void scheduler::kill_task(Task T) {
     T.taskState = "DEAD";
 }
@@ -144,4 +143,18 @@ void garbage_collect(int T_ID) {
         ptrTCB = ptrTCB->next;
     }
     prevTCB->next = ptrTCB->next;
+}*/
+
+void scheduler::dump() {
+    cout << "\n------------ PROCESS TABLE ------------" << endl;
+    cout << "Quantum = " << current_quantum << endl;
+    cout << "Task-ID\t Elapsed Time\tState" << endl;
+
+    tcb* ptrTCB = process_table;
+    while (ptrTCB != nullptr) {
+        cout << ptrTCB->task_id << "\t" << ptrTCB->start_time << "\t" << ptrTCB->state << "\n";
+        ptrTCB = ptrTCB->next;
+    }
+
+    cout << "---------------------------------------------\n" << endl;
 }

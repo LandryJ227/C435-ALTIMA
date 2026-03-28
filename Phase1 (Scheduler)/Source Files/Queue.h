@@ -1,3 +1,4 @@
+#pragma once
 #include "tcb.h"
 
 class queue {

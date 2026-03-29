@@ -4,34 +4,124 @@
 #include <iostream>
 #include <unistd.h>
 #include <pthread.h>
-
 #include <assert.h>
 #include <time.h>
 #include <ncurses.h>
 #include <stdarg.h>
 #include <termios.h>
 #include <fcntl.h>
-
 using namespace std;
 
+void* thread1Fun(void* arg);
+void* thread2Fun(void* arg);
+void* thread3Fun(void* arg);
+void* thread4Fun(void* arg);
+void* thread5Fun(void* arg);
+
 int main() {
+    pthread_t thread1ID, thread2ID, thread3ID, thread4ID, thread5ID;
     scheduler sched;
     initscr();
-    WINDOW * outputWin = newwin(12, 80, 3, 2);
-    box(outputWin, 0, 0);
-    //mvwprintw(outputWin, 2, 28, "ULTIMA 2.0 (Phase 1)");
+    WINDOW * outputWinOuter = newwin(50, 80, 3, 2);
+    WINDOW* outputWin = newwin(47, 78, 6, 3);
+    WINDOW * threadWin = newwin(10, 80, 3, 85);
+    WINDOW * schedDumpWin = newwin(15, 80, 13, 85);
+    WINDOW * semaDumpWin = newwin(25, 80, 28, 85);
+    box(outputWinOuter, 0, 0);
+    box(threadWin, 0, 0);
+    box(schedDumpWin, 0, 0);
+    box(semaDumpWin, 0, 0);
+    mvwprintw(outputWinOuter, 2, 18, "ULTIMA 2.0 (Phase 1: Scheduler and Semaphore)");
+    mvwprintw(threadWin, 2, 25, "Window controlled by semaphore");
+    mvwprintw(threadWin, 3, 25, "------------------------------");
+    mvwprintw(schedDumpWin, 1, 20, "------------ PROCESS  TABLE ------------");
+    mvwprintw(semaDumpWin, 1, 1, "Semaphore Output Info");
     wrefresh(outputWin);
+    wrefresh(outputWinOuter);
+    wrefresh(threadWin);
+    wrefresh(schedDumpWin);
+    wrefresh(semaDumpWin);
+    sleep(5);
+    sched.start(outputWin);
 
+    int task1 = sched.create_task("File Explorer", outputWin);
+    int task2 = sched.create_task("Task Manager", outputWin);
+    int task3 = sched.create_task("Chrome", outputWin);
+    int task4 = sched.create_task("Steam", outputWin);
+    int task5 = sched.create_task("Firefox", outputWin);
+    int task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
 
-    int task1 = sched.create_task("File Explorer");
-    int task2 = sched.create_task("Task Manager");
-    int task3 = sched.create_task("Chrome");
-    int task4 = sched.create_task("Steam");
-    int task5 = sched.create_task("Firefox");
-    int task6 = sched.create_task("VIRUS");
+    /*
     sched.kill_task(2);
-    sched.set_state(3, "RUNNING");
-    //cout << sched.get_state(3) << endl;
-    sched.dump(outputWin);
+    sched.set_state(3, "RUNNING");*/
+    sched.dump(schedDumpWin);
+
+    int thread1 = pthread_create(&thread1ID, nullptr, thread1Fun, threadWin);
+    int thread2 = pthread_create(&thread2ID, nullptr, thread2Fun, threadWin);
+    int thread3 = pthread_create(&thread3ID, nullptr, thread3Fun, threadWin);
+    int thread4 = pthread_create(&thread4ID, nullptr, thread4Fun, threadWin);
+    int thread5 = pthread_create(&thread5ID, nullptr, thread5Fun, threadWin);
+
+    sleep(5);
     endwin();
+}
+
+void* thread1Fun(void* arg) {
+    WINDOW* win = (WINDOW*)arg;
+    //check semaphore
+    mvwprintw(win, 5, 30, "Hello from thread 1");
+    wrefresh(win);
+    return nullptr;
+}
+void* thread2Fun(void* arg) {
+    WINDOW* win = (WINDOW*)arg;
+    //check semaphore
+    mvwprintw(win, 5, 30, "Hello from thread 2");
+    wrefresh(win);
+    return nullptr;
+}
+void* thread3Fun(void* arg) {
+    WINDOW* win = (WINDOW*)arg;
+    //check semaphore
+    mvwprintw(win, 5, 30, "Hello from thread 3");
+    wrefresh(win);
+    return nullptr;
+}
+void* thread4Fun(void* arg) {
+    WINDOW* win = (WINDOW*)arg;
+    //check semaphore
+    mvwprintw(win, 5, 30, "Hello from thread 4");
+    wrefresh(win);
+    return nullptr;
+}
+void* thread5Fun(void* arg) {
+    WINDOW* win = (WINDOW*)arg;
+    //check semaphore
+    mvwprintw(win, 5, 30, "Hello from thread 5");
+    wrefresh(win);
+    return nullptr;
 }

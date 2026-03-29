@@ -123,13 +123,22 @@ void scheduler::yield() {
 }
 //#########################################################
 int scheduler::create_task(string name, WINDOW* win) {
-    static int line = 5;
-    mvwprintw(win, line++, 20, "Creating task #%d...", next_available_task_id);
+    int maxLines = getmaxy(win) - 2;
+    scrollok(win, TRUE);
+    if (outputLine >= maxLines) {
+        scroll(win);
+        scroll(win);
+        scroll(win);
+        //box(win, 0, 0);
+        outputLine = maxLines-3;
+    }
+    mvwprintw(win, outputLine++, 20, "Creating task #%d...", next_available_task_id);
     wrefresh(win);
     sleep(1);
     if (next_available_task_id == MAX_TASKS) {      //check if exeeding max tasks
-        mvwprintw(win, line++, 20, "FAILED: Available tasks exeeded.");
+        mvwprintw(win, outputLine++, 20, "FAILED: Available tasks exeeded.");
         wrefresh(win);
+        outputLine++;
         sleep(1);
         return (-1);                                //return -1 for error
     }
@@ -142,9 +151,9 @@ int scheduler::create_task(string name, WINDOW* win) {
 
     if (process_table == nullptr) {                 //if no tasks yet
         process_table = newTask;                    //process_table will point to this task
-        mvwprintw(win, line++, 20, "Successfully created task #%d", newTask->task_id);
+        mvwprintw(win, outputLine++, 20, "Successfully created task #%d", newTask->task_id);
         wrefresh(win);
-        line++;
+        outputLine++;
         sleep(1);
         return newTask->task_id;
     }
@@ -155,9 +164,9 @@ int scheduler::create_task(string name, WINDOW* win) {
     }
     ptrTCB->next = newTask;                      //add this new task to the end of process list
 
-    mvwprintw(win, line++, 20, "Successfully created task #%d", newTask->task_id);
+    mvwprintw(win, outputLine++, 20, "Successfully created task #%d", newTask->task_id);
     wrefresh(win);
-    line++;
+    outputLine++;
     sleep(1);
     return newTask->task_id;                      //return the task id
 }
@@ -192,20 +201,19 @@ void scheduler::garbage_collect(int T_ID) {
 }
 //#########################################################
 void scheduler::dump(WINDOW* win) {
-    mvwprintw(win, 1, 20, "------------ PROCESS TABLE ------------");
-    mvwprintw(win, 4, 10,  "Quantum = %ld", current_quantum);
-    mvwprintw(win, 7, 10,  "Task-ID\t Elapsed Time\tState");
-    wrefresh(win);
-    sleep(5);
-    return;
+    int line = 3;
+    mvwprintw(win, line++, 20,  "Quantum = %ld", current_quantum);
+    line++;
+    mvwprintw(win, line++, 20,  "Task-ID\t Elapsed Time\tState");
 
     tcb* ptrTCB = process_table;
+
     while (ptrTCB != nullptr) {
-        cout << ptrTCB->task_id << "\t "
-             << (clock() - ptrTCB->start_time) << "\t\t"
-             << ptrTCB->state << "\n";
+        mvwprintw(win, line++, 20, "   %d\t\t%d\t%s", ptrTCB->task_id, ptrTCB->start_time, ptrTCB->state.c_str());
         ptrTCB = ptrTCB->next;
         sleep(1);
     }
-    cout << "---------------------------------------------\n" << endl;
+    mvwprintw(win, line, 20, "----------------------------------------");
+    wrefresh(win);
+    sleep(5);
 }

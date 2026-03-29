@@ -37,7 +37,7 @@ public:
 
     tcb *process_table;
     int numOfTasks=0;
-
+    int outputLine = 5;
     int current_task;
     long current_quantum;
     int next_available_task_id=0;

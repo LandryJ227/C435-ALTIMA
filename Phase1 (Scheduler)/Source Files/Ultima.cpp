@@ -22,17 +22,24 @@ int main() {
     pthread_t thread1ID, thread2ID, thread3ID, thread4ID, thread5ID;
     scheduler sched;
     initscr();
-    WINDOW * outputWin = newwin(50, 80, 3, 2);
-    WINDOW * threadWin = newwin(25, 80, 3, 85);
+    WINDOW * outputWinOuter = newwin(50, 80, 3, 2);
+    WINDOW* outputWin = newwin(47, 78, 6, 3);
+    WINDOW * threadWin = newwin(10, 80, 3, 85);
+    WINDOW * schedDumpWin = newwin(15, 80, 13, 85);
     WINDOW * semaDumpWin = newwin(25, 80, 28, 85);
-    box(outputWin, 0, 0);
+    box(outputWinOuter, 0, 0);
     box(threadWin, 0, 0);
+    box(schedDumpWin, 0, 0);
     box(semaDumpWin, 0, 0);
-    mvwprintw(outputWin, 2, 18, "ULTIMA 2.0 (Phase 1: Scheduler and Semaphore)");
-    mvwprintw(threadWin, 2, 10, "Window controlled by semaphore");
-    mvwprintw(semaDumpWin, 2, 10, "Semaphore Output Info");
+    mvwprintw(outputWinOuter, 2, 18, "ULTIMA 2.0 (Phase 1: Scheduler and Semaphore)");
+    mvwprintw(threadWin, 2, 25, "Window controlled by semaphore");
+    mvwprintw(threadWin, 3, 25, "------------------------------");
+    mvwprintw(schedDumpWin, 1, 20, "------------ PROCESS  TABLE ------------");
+    mvwprintw(semaDumpWin, 1, 1, "Semaphore Output Info");
     wrefresh(outputWin);
+    wrefresh(outputWinOuter);
     wrefresh(threadWin);
+    wrefresh(schedDumpWin);
     wrefresh(semaDumpWin);
     sleep(5);
     sched.start(outputWin);
@@ -43,11 +50,36 @@ int main() {
     int task4 = sched.create_task("Steam", outputWin);
     int task5 = sched.create_task("Firefox", outputWin);
     int task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+    task6 = sched.create_task("VIRUS", outputWin);
+
     /*
     sched.kill_task(2);
-    sched.set_state(3, "RUNNING");
-    sched.dump(outputWin);
-    */
+    sched.set_state(3, "RUNNING");*/
+    sched.dump(schedDumpWin);
+
     int thread1 = pthread_create(&thread1ID, nullptr, thread1Fun, threadWin);
     int thread2 = pthread_create(&thread2ID, nullptr, thread2Fun, threadWin);
     int thread3 = pthread_create(&thread3ID, nullptr, thread3Fun, threadWin);
@@ -60,31 +92,36 @@ int main() {
 
 void* thread1Fun(void* arg) {
     WINDOW* win = (WINDOW*)arg;
-    mvwprintw(win, 5, 1, "Hello from thread 1");
+    //check semaphore
+    mvwprintw(win, 5, 30, "Hello from thread 1");
     wrefresh(win);
     return nullptr;
 }
 void* thread2Fun(void* arg) {
     WINDOW* win = (WINDOW*)arg;
-    mvwprintw(win, 6, 1, "Hello from thread 2");
+    //check semaphore
+    mvwprintw(win, 5, 30, "Hello from thread 2");
     wrefresh(win);
     return nullptr;
 }
 void* thread3Fun(void* arg) {
     WINDOW* win = (WINDOW*)arg;
-    mvwprintw(win, 7, 1, "Hello from thread 3");
+    //check semaphore
+    mvwprintw(win, 5, 30, "Hello from thread 3");
     wrefresh(win);
     return nullptr;
 }
 void* thread4Fun(void* arg) {
     WINDOW* win = (WINDOW*)arg;
-    mvwprintw(win, 8, 1, "Hello from thread 4");
+    //check semaphore
+    mvwprintw(win, 5, 30, "Hello from thread 4");
     wrefresh(win);
     return nullptr;
 }
 void* thread5Fun(void* arg) {
     WINDOW* win = (WINDOW*)arg;
-    mvwprintw(win, 9, 1, "Hello from thread 5");
+    //check semaphore
+    mvwprintw(win, 5, 30, "Hello from thread 5");
     wrefresh(win);
     return nullptr;
 }

@@ -1,7 +1,10 @@
+#pragma once
 #include "Queue.h"
 #include "scheduler.h"
 
 using namespace std;
+
+class scheduler;
 
 class semaphore {
     string resource_name;
@@ -16,5 +19,5 @@ public:
 
     void down(int T);
     void up();
-    void dump(int taskID);
+    void dump(int level);
 };

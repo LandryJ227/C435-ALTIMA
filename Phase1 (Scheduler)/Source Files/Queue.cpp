@@ -21,6 +21,7 @@ int queue::dequeue() {
     }
     else {
         cout << "ERROR: cannot dequeue from empty queue" << endl;
+        return -1;
     }
 }
 

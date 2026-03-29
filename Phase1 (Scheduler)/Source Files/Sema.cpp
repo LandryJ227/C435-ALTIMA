@@ -1,6 +1,7 @@
 #include "Queue.h"
 #include <iostream>
 #include "Sema.h"
+#include <string>
 
 using namespace std;
 

@@ -26,14 +26,16 @@ struct tcb {
     tcb *next;
 };
 
+const string READY = "READY";
+const string RUNNING = "RUNNING";
+const string BLOCKED = "BLOCKED";
+const string DEAD = "DEAD";
+static const int MAX_TASKS = 5;
+
 class scheduler {
 public:
 
-    const string READY = "READY";
-    const string RUNNING = "RUNNING";
-    const string BLOCKED = "BLOCKED";
-    const string DEAD = "DEAD";
-    static const int MAX_TASKS = 5;
+
 
     tcb *process_table;
     int numOfTasks=0;

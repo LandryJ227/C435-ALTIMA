@@ -20,15 +20,23 @@ semaphore::~semaphore() {
 
 void semaphore::down(int taskID)
 {
-
-    if(taskID == lucky_task) {
+    if (taskID == lucky_task) {
         cout << "Task # " << lucky_task << " already has the resource! Ignore request." << endl;
         dump(1);
     }
     else {
-        if(sema_value >= 1) {
+        if (sema_value >= 1) {
             sema_value--;
             lucky_task = taskID;
+            dump(1);
+
+            sched_ptr->yield();
+            dump(1);
+        }
+        else {
+            sema_queue.enqueue(taskID);
+            sched_ptr->set_state(taskID, "BLOCKED");
+            cout << "Block    : " << taskID << " and place into semaphore queue" << endl;
             dump(1);
 
             sched_ptr->yield();

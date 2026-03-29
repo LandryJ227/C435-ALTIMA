@@ -54,17 +54,20 @@ int main() {
     sleep(5);
     sched.start(outputWin);
 
-    ThreadArgs args1{threadWin, &screenSema, 1};
-    ThreadArgs args2{threadWin, &screenSema, 2};
-    ThreadArgs args3{threadWin, &screenSema, 3};
-    ThreadArgs args4{threadWin, &screenSema, 4};
-    ThreadArgs args5{threadWin, &screenSema, 5};
+
 
     int task1 = sched.create_task("File Explorer", outputWin);
     int task2 = sched.create_task("Task Manager", outputWin);
     int task3 = sched.create_task("Chrome", outputWin);
     int task4 = sched.create_task("Steam", outputWin);
     int task5 = sched.create_task("Firefox", outputWin);
+
+    ThreadArgs args1{threadWin, &screenSema, task1};
+    ThreadArgs args2{threadWin, &screenSema, task2};
+    ThreadArgs args3{threadWin, &screenSema, task3};
+    ThreadArgs args4{threadWin, &screenSema, task4};
+    ThreadArgs args5{threadWin, &screenSema, task5};
+
     int task6 = sched.create_task("VIRUS", outputWin);
     task6 = sched.create_task("VIRUS", outputWin);
     task6 = sched.create_task("VIRUS", outputWin);
@@ -132,7 +135,7 @@ void* thread2Fun(void* arg) {
     int taskID = args->taskID;
 
     sem->down(taskID);
-    mvwprintw(win, 5, 30, "Hello from thread 2");
+    mvwprintw(win, 6, 30, "Hello from thread 2");
     wrefresh(win);
     sem->up();
     return nullptr;
@@ -144,7 +147,7 @@ void* thread3Fun(void* arg) {
     int taskID = args->taskID;
 
     sem->down(taskID);
-    mvwprintw(win, 5, 30, "Hello from thread 3");
+    mvwprintw(win, 7, 30, "Hello from thread 3");
     wrefresh(win);
     sem->up();
     return nullptr;
@@ -156,7 +159,7 @@ void* thread4Fun(void* arg) {
     int taskID = args->taskID;
 
     sem->down(taskID);
-    mvwprintw(win, 5, 30, "Hello from thread 4");
+    mvwprintw(win, 8, 30, "Hello from thread 4");
     wrefresh(win);
     sem->up();
     return nullptr;
@@ -168,7 +171,7 @@ void* thread5Fun(void* arg) {
     int taskID = args->taskID;
 
     sem->down(taskID);
-    mvwprintw(win, 5, 30, "Hello from thread 5");
+    mvwprintw(win, 9, 30, "Hello from thread 5");
     wrefresh(win);
     sem->up();
     return nullptr;

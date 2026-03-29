@@ -17,6 +17,7 @@
 using namespace std;
 //#########################################################
 scheduler::scheduler() {
+    process_table = nullptr;
     current_task = -1;
     next_available_task_id = 0;
     current_quantum = 300;
@@ -144,6 +145,7 @@ int scheduler::create_task(string name, WINDOW* win) {
     }
 
     tcb* newTask = new tcb();                       //new task
+    newTask->next = nullptr;
     newTask->taskName = name;                       //set name of task
     newTask->state = "READY";                       //set state of task
     newTask->start_time = clock();                  //set start time of task

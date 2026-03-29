@@ -26,7 +26,7 @@ public:
 
     int current_task;
     long current_quantum;
-    int next_available_task_id;
+    int next_available_task_id=0;
     tcb task_table[MAX_TASKS];
 
     void dump();
@@ -39,7 +39,7 @@ public:
     int get_task_id();
     void start();
     int create_task(string name);              // create appropriate data structures and calls coroutine()
-    void kill_task(Task T);                // to kill a task (Set its status to DEAD)
+    void kill_task(int T_ID);                // to kill a task (Set its status to DEAD)
     void yield();                    // strict round robin process switch.
     void garbage_collect(int T_ID);          // remove dead task, free their resources, etc.
     //dump(int level);            // debugging function with level indicating the verbosity of the

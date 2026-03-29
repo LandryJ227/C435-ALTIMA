@@ -5,6 +5,15 @@
 #include <iostream>
 #include <unistd.h>
 #include <ctime>
+
+#include <assert.h>
+#include <time.h>
+#include <ncurses.h>
+#include <stdarg.h>
+#include <termios.h>
+#include <fcntl.h>
+
+
 using namespace std;
 //#########################################################
 scheduler::scheduler() {
@@ -50,7 +59,7 @@ string scheduler::get_state(int T_ID) {
         return ptrTCB->state;
 }
 //#########################################################
-string scheduler::get_start_time(int T_ID) {
+clock_t scheduler::get_start_time(int T_ID) {
     if (process_table->task_id == T_ID) {
         return process_table->start_time;
     }
@@ -115,9 +124,9 @@ void scheduler::yield() {
 }
 //#########################################################
 int scheduler::create_task(string name) {
-    cout << "Entering createTask()" << endl;
+    //cout << "Entering createTask()" << endl;
     if (next_available_task_id == MAX_TASKS) {      //check if exeeding max tasks
-        cout << "Create_task() FAILED: Available tasks exeeded. Max_TASKS = " << MAX_TASKS << endl;
+        //cout << "Create_task() FAILED: Available tasks exeeded. Max_TASKS = " << MAX_TASKS << endl;
         return (-1);                                //return -1 for error
     }
 
@@ -129,7 +138,7 @@ int scheduler::create_task(string name) {
 
     if (process_table == nullptr) {                 //if no tasks yet
         process_table = newTask;                    //process_table will point to this task
-        cout << "Exiting createTask(), returning taskID = " << newTask->task_id << endl;
+        //cout << "Exiting createTask(), returning taskID = " << newTask->task_id << endl;
         return newTask->task_id;
     }
 
@@ -139,7 +148,7 @@ int scheduler::create_task(string name) {
     }
     ptrTCB->next = newTask;                      //add this new task to the end of process list
 
-    cout << "Exiting createTask(), returning taskID = " << newTask->task_id << endl;
+    //cout << "Exiting createTask(), returning taskID = " << newTask->task_id << endl;
     return newTask->task_id;                      //return the task id
 }
 //#########################################################
@@ -172,10 +181,13 @@ void scheduler::garbage_collect(int T_ID) {
     prevTCB->next = ptrTCB->next;
 }
 //#########################################################
-void scheduler::dump() {
-    cout << "\n------------ PROCESS TABLE ------------" << endl;
-    cout << "Quantum = " << current_quantum << endl;
-    cout << "Task-ID\t Elapsed Time\tState" << endl;
+void scheduler::dump(WINDOW* win) {
+    mvwprintw(win, 1, 20, "------------ PROCESS TABLE ------------");
+    mvwprintw(win, 4, 10,  "Quantum = %ld", current_quantum);
+    mvwprintw(win, 7, 10,  "Task-ID\t Elapsed Time\tState");
+    wrefresh(win);
+    sleep(5);
+    return;
 
     tcb* ptrTCB = process_table;
     while (ptrTCB != nullptr) {
@@ -187,4 +199,3 @@ void scheduler::dump() {
     }
     cout << "---------------------------------------------\n" << endl;
 }
-//#########################################################

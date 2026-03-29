@@ -2,6 +2,20 @@
 #include "tcb.h"
 #include <string>
 #include <ctime>
+#include "Ultima.h"
+#include "scheduler.h"
+#include "Sema.h"
+#include <iostream>
+#include <unistd.h>
+#include <pthread.h>
+
+#include <assert.h>
+#include <time.h>
+#include <ncurses.h>
+#include <stdarg.h>
+#include <termios.h>
+#include <fcntl.h>
+
 using namespace std;
 
 struct tcb {
@@ -29,13 +43,14 @@ public:
     int next_available_task_id=0;
     tcb task_table[MAX_TASKS];
 
-    void dump();
+    void dump(WINDOW* win);
     scheduler();
     ~scheduler();
     void set_quantum(long quantum);
     long get_quantum();
     void set_state(int the_taskid, string the_state);
     string get_state(int the_taskid);
+    clock_t get_start_time(int T_ID);
     int get_task_id();
     void start();
     int create_task(string name);              // create appropriate data structures and calls coroutine()

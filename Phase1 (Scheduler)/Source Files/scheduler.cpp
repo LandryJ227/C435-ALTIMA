@@ -75,15 +75,14 @@ int scheduler::get_task_id() {
     return current_task;
 }
 //#########################################################
-void scheduler::start() {
-    cout << ".........." << endl;
-    cout << "..........SCHEDULING STARTED" << endl;
-    cout << "..........\n" << endl;
-    task_table[0].start_time = clock();
-    task_table[0].state = RUNNING;
+void scheduler::start(WINDOW* win) {
+    mvwprintw(win, 3, 20, "..........SCHEDULING STARTED..........\n");
+    wrefresh(win);
+    //task_table[0].start_time = clock();
+    //task_table[0].state = RUNNING;
     current_task = 0;
     set_quantum(1000 / MAX_TASKS);
-    sleep(1);
+    sleep(3);
 }
 //#########################################################
 void scheduler::yield() {
@@ -123,10 +122,15 @@ void scheduler::yield() {
     else cout << "NO Yield! (Task: " << current_task << " Still have some quantum left)" << endl;
 }
 //#########################################################
-int scheduler::create_task(string name) {
-    //cout << "Entering createTask()" << endl;
+int scheduler::create_task(string name, WINDOW* win) {
+    static int line = 5;
+    mvwprintw(win, line++, 20, "Creating task #%d...", next_available_task_id);
+    wrefresh(win);
+    sleep(1);
     if (next_available_task_id == MAX_TASKS) {      //check if exeeding max tasks
-        //cout << "Create_task() FAILED: Available tasks exeeded. Max_TASKS = " << MAX_TASKS << endl;
+        mvwprintw(win, line++, 20, "FAILED: Available tasks exeeded.");
+        wrefresh(win);
+        sleep(1);
         return (-1);                                //return -1 for error
     }
 
@@ -138,7 +142,10 @@ int scheduler::create_task(string name) {
 
     if (process_table == nullptr) {                 //if no tasks yet
         process_table = newTask;                    //process_table will point to this task
-        //cout << "Exiting createTask(), returning taskID = " << newTask->task_id << endl;
+        mvwprintw(win, line++, 20, "Successfully created task #%d", newTask->task_id);
+        wrefresh(win);
+        line++;
+        sleep(1);
         return newTask->task_id;
     }
 
@@ -148,7 +155,10 @@ int scheduler::create_task(string name) {
     }
     ptrTCB->next = newTask;                      //add this new task to the end of process list
 
-    //cout << "Exiting createTask(), returning taskID = " << newTask->task_id << endl;
+    mvwprintw(win, line++, 20, "Successfully created task #%d", newTask->task_id);
+    wrefresh(win);
+    line++;
+    sleep(1);
     return newTask->task_id;                      //return the task id
 }
 //#########################################################

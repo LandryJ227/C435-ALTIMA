@@ -52,8 +52,8 @@ public:
     string get_state(int the_taskid);
     clock_t get_start_time(int T_ID);
     int get_task_id();
-    void start();
-    int create_task(string name);              // create appropriate data structures and calls coroutine()
+    void start(WINDOW* win);
+    int create_task(string name, WINDOW* win);              // create appropriate data structures and calls coroutine()
     void kill_task(int T_ID);                // to kill a task (Set its status to DEAD)
     void yield();                    // strict round robin process switch.
     void garbage_collect(int T_ID);          // remove dead task, free their resources, etc.

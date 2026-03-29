@@ -3,7 +3,7 @@
 #include <iostream>
 using namespace std;
 
-void queue::enqueue(Task T) {
+void queue::enqueue(int T) {
     if ((tail + 1) % QUEUE_SIZE != head) {
         taskQueue[tail] = T;
         tail = (tail + 1) % QUEUE_SIZE;
@@ -12,9 +12,9 @@ void queue::enqueue(Task T) {
     else cout << "ERROR: cannot enqueue into full queue" << endl;
 }
 
-Task queue::dequeue() {
+int queue::dequeue() {
     if (head != tail) {
-        Task tempTask = taskQueue[head];
+        int tempTask = taskQueue[head];
         head = (head + 1) % QUEUE_SIZE;
         numOfTasks--;
         return tempTask;
@@ -27,4 +27,15 @@ Task queue::dequeue() {
 bool queue::isEmpty() {
     if (head == tail) return true;
     else return false;
+}
+
+void queue::printQueue() {
+    if (head == tail) {
+        cout << "Queue is empty" << endl;
+    }
+    else {
+        for (int i = 0; i < QUEUE_SIZE; i++) {
+            cout << taskQueue[i] << endl;
+        }
+    }
 }

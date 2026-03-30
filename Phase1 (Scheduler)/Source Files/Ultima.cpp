@@ -138,6 +138,7 @@ void* thread3Fun(void* arg) {
     sem->up(semaDumpWin, outputWin);
     return nullptr;
 }
+
 void* thread4Fun(void* arg) {
     ThreadArgs* args = (ThreadArgs*)arg;
     WINDOW* win = args->win;

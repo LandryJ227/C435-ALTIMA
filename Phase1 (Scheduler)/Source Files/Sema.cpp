@@ -98,4 +98,5 @@ void semaphore::dump(int level, WINDOW* win)
             cout << "ERROR in SEMAPHORE DUMP level";
     }
     cout << "---------------------------------------" << endl;*/
+
 }

@@ -5,8 +5,6 @@
 #include <iostream>
 #include <unistd.h>
 #include <ctime>
-
-#include <assert.h>
 #include <time.h>
 #include <ncurses.h>
 #include <stdarg.h>
@@ -86,20 +84,19 @@ void scheduler::start(WINDOW* win) {
     sleep(3);
 }
 //#########################################################
-void scheduler::yield() {
+void scheduler::yield(WINDOW* win) {
     int counter = 0;
     tcb* currentTCB = process_table;
     while (currentTCB->task_id != current_task) {
         currentTCB = currentTCB->next;
     }
-
-    cout << "Current Task # " << current_task << " is trying to Yield" << endl;
+    mvwprintw(win, outputLine++, 20, "Current Task #%d is trying to Yield.", current_task);
     clock_t elapsed_time = clock() - get_start_time(current_task);
-    cout << "Task: " << current_task << ", Elapsed time: " << elapsed_time << endl;
-    cout << "Current Quantum: " << current_quantum << endl;
+    mvwprintw(win, outputLine++, 20, "Task: %d, Elapsed time: %d", current_task, elapsed_time);
+    mvwprintw(win, outputLine++, 20, "Current Quantum: %d",  current_quantum);
 
     if (elapsed_time >= current_quantum) {
-        cout << "Yielding....(Switching from task #" << current_task << " to next ready task)" << endl;
+        mvwprintw(win, outputLine++, 20, "Yielding....(Switching from task #%d to next ready task", current_task);
         if (currentTCB->state == RUNNING)
             currentTCB->state = READY;
 
@@ -113,14 +110,14 @@ void scheduler::yield() {
 
         if (counter < MAX_TASKS - 1 && currentTCB->state == READY) {
             currentTCB->start_time = clock();
-           currentTCB->state = RUNNING;
-            cout << "Started Running Task #" << current_task << endl;
+            currentTCB->state = RUNNING;
+            mvwprintw(win, outputLine++, 20, "Started Running Task #%d", current_task);
         }
         else {
-            cout << "POSSIBLE DEAD LOCK" << endl;
+            mvwprintw(win, outputLine++, 20, "POSSIBLE DEAD LOCK");
         }
     }
-    else cout << "NO Yield! (Task: " << current_task << " Still have some quantum left)" << endl;
+    else mvwprintw(win, outputLine++, 20, "NO Yield! (Task: %d still have some quantum left", current_task);
 }
 //#########################################################
 int scheduler::create_task(string name, WINDOW* win) {

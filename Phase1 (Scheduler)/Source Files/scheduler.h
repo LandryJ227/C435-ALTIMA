@@ -1,14 +1,9 @@
 #pragma once
 #include "tcb.h"
 #include <string>
-#include <ctime>
 #include "Ultima.h"
 #include "scheduler.h"
-#include "Sema.h"
 #include <iostream>
-#include <unistd.h>
-#include <pthread.h>
-
 #include <assert.h>
 #include <time.h>
 #include <ncurses.h>
@@ -34,13 +29,13 @@ static const int MAX_TASKS = 5;
 
 class scheduler {
 public:
-/*
+
     const string READY = "READY";
     const string RUNNING = "RUNNING";
     const string BLOCKED = "BLOCKED";
     const string DEAD = "DEAD";
     static const int MAX_TASKS = 5;
-*/
+
     tcb *process_table;
     int numOfTasks=0;
     int outputLine = 5;
@@ -59,12 +54,9 @@ public:
     clock_t get_start_time(int T_ID);
     int get_task_id();
     void start(WINDOW* win);
-    int create_task(string name, WINDOW* win);              // create appropriate data structures and calls coroutine()
-    void kill_task(int T_ID);                // to kill a task (Set its status to DEAD)
-    void yield();                    // strict round robin process switch.
-    void garbage_collect(int T_ID);          // remove dead task, free their resources, etc.
-    //dump(int level);            // debugging function with level indicating the verbosity of the
-                                //dump include some functions which will allow you to dump the
-                                //contents of the process table in a readable
-                                //format. See the expected output section (below) for suggestions.
+    int create_task(string name, WINDOW* win);
+    void kill_task(int T_ID);
+    void yield(WINDOW* win);
+    void garbage_collect(int T_ID);
+
 };

@@ -83,24 +83,23 @@ void scheduler::start() {
     sleep(3);
 }
 //#########################################################
-/*
 void scheduler::yield(queue sema_queue) {
     int counter = 0;
     tcb* currentTCB = process_table;                //start at front of table
     while (currentTCB->task_id != current_task) {   //traverse until we find current task
         currentTCB = currentTCB->next;
     }
-    mvwprintw(win, outputLine++, 20, "Current Task #%d is trying to Yield.", current_task);
+    cout << "Current Task #" << current_task << " is trying to Yield." << endl;
     clock_t elapsed_time = clock() - get_start_time(current_task);
-    mvwprintw(win, outputLine++, 20, "Task: %d, Elapsed time: %d", current_task, elapsed_time);
-    mvwprintw(win, outputLine++, 20, "Current Quantum: %d",  current_quantum);
+    cout << "Task: " << current_task << ". Elapsed time: " << elapsed_time;
+    cout << "Current Quantum: " << current_quantum;
 
     if (elapsed_time >= current_quantum) {
-        mvwprintw(win, outputLine++, 20, "Yielding....(Switching from task #%d to next ready task", current_task);
+        cout << "Yielding....(Switching from task #" << current_task << " to next ready task";
         if (currentTCB->state == RUNNING)
             currentTCB->state = READY;
 
-        current_task = sema_queue.peek();
+        //current_task = sema_queue.peek();
         while (currentTCB->task_id != current_task && counter < MAX_TASKS-1) {
             currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
             counter++;
@@ -112,20 +111,20 @@ void scheduler::yield(queue sema_queue) {
             current_task = (current_task + 1) % MAX_TASKS;             //go to next task
             currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
             counter ++;
-        }
+        }*/
 
         if (counter < MAX_TASKS - 1 && currentTCB->task_id == current_task) {
             currentTCB->start_time = clock();
             currentTCB->state = RUNNING;
-            mvwprintw(win, outputLine++, 20, "Started Running Task #%d", current_task);
+            cout << "Started Running Task #" << current_task << endl;
         }
         else {
-            mvwprintw(win, outputLine++, 20, "POSSIBLE DEAD LOCK");
+            cout << "POSSIBLE DEAD LOCK" << endl;
         }
     }
-    else mvwprintw(win, outputLine++, 20, "NO Yield! (Task: %d still have some quantum left", current_task);
+    else cout << "NO Yield! (Task: "<< current_task << " still have some quantum left" << endl;
 }
-*/
+
 //#########################################################
 int scheduler::create_task(string name) {
     cout << "Creating task #" << next_available_task_id << endl;

@@ -17,7 +17,8 @@ semaphore::~semaphore() {
     //Destroy.
 }
 
-void semaphore::down(int taskID){
+void semaphore::down(int taskID) {
+    pthread_mutex_lock(&mutex);
     if (taskID == lucky_task) { //taskID already obtained resource.
         cout << "Task " << lucky_task <<" already has the resource! Ignore request." << endl;
         dump(1);
@@ -31,19 +32,20 @@ void semaphore::down(int taskID){
         else {
             sema_queue.enqueue(taskID);
             sched_ptr->set_state(taskID, "BLOCKED");
-            "Block : " << taskID << " and place into semaphore queue" << endl;
+            cout << "Block : " << taskID << " and place into semaphore queue" << endl;
             dump(1);
-
+            pthread_cond_wait(&cond, &mutex);
             sched_ptr->yield(sema_queue);
             dump(1);
         }
     }
+    pthread_mutex_unlock(&mutex);
 }
 
-void semaphore::up();
+void semaphore::up()
 {
-    int task_id;
     pthread_mutex_lock(&mutex);
+    int task_id;
     cout <<  "TaskID : %d, LuckID : %d" <<  sched_ptr->get_task_id() << lucky_task;
 
     if(sched_ptr->get_task_id() == lucky_task)
@@ -62,9 +64,10 @@ void semaphore::up();
             dump(1);
             sched_ptr->yield(sema_queue);
             dump(1);
+            pthread_cond_signal(&cond);
         }
     }
-    //pthread_mutex_unlock(&mutex);  --Mutex?
+    pthread_mutex_unlock(&mutex);
 }
 
 void semaphore::dump(int level)

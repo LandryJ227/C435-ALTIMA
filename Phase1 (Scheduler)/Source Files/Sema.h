@@ -12,7 +12,7 @@ class semaphore {
     int lucky_task;
     queue sema_queue;
     scheduler *sched_ptr;
-    pthread_mutex_t mutex;
+
 public:
     semaphore(int starting_value, string name, scheduler *theScheduler);
     ~semaphore();
@@ -20,4 +20,6 @@ public:
     void down(int taskID);
     void up();
     void dump(int level);
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
 };

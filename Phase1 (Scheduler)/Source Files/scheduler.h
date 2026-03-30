@@ -1,7 +1,5 @@
 #pragma once
-#include "tcb.h"
 #include <string>
-#include "Ultima.h"
 #include "scheduler.h"
 #include <iostream>
 #include <assert.h>
@@ -10,6 +8,7 @@
 #include <stdarg.h>
 #include <termios.h>
 #include <fcntl.h>
+#include "Queue.h"
 
 using namespace std;
 
@@ -56,7 +55,7 @@ public:
     void start(WINDOW* win);
     int create_task(string name, WINDOW* win);
     void kill_task(int T_ID);
-    void yield(WINDOW* win);
+    void yield(WINDOW* win, queue sema_queue);
     void garbage_collect(int T_ID);
 
 };

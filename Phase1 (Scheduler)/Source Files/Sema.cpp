@@ -28,25 +28,22 @@ void semaphore::down(int taskID, WINDOW* win, WINDOW* schedWin)
 
     if (taskID == lucky_task) {
         mvwprintw(win, outputLine++, 2, "Task #%d already has the resource! Ignore request.", lucky_task);
-        dump(1);
+        dump(1, win);
     }
     else {
         if (sema_value >= 1) {
             sema_value--;
             lucky_task = taskID;
-            dump(1);
-
-            sched_ptr->yield(schedWin);
-            dump(1);
+            dump(1, win);
         }
         else {
             sema_queue.enqueue(taskID);
             sched_ptr->set_state(taskID, "BLOCKED");
             mvwprintw(win, outputLine++, 2, "Block : %d and place into semaphore queue",  taskID);
-            dump(1);
+            dump(1, win);
 
-            sched_ptr->yield(schedWin);
-            dump(1);
+            sched_ptr->yield(schedWin, sema_queue);
+            dump(1, win);
         }
     }
     pthread_mutex_unlock(&mutex);
@@ -64,7 +61,7 @@ void semaphore::up(WINDOW* win, WINDOW* schedWin)
         if(sema_queue.isEmpty()) {
             sema_value++;
             lucky_task = -1;
-            dump(1);
+            dump(1, win);
         }
         else {
             task_id = sema_queue.dequeue();
@@ -72,9 +69,9 @@ void semaphore::up(WINDOW* win, WINDOW* schedWin)
             mvwprintw (win, outputLine++, 3, "UnBlock  : %d and release from the queue", task_id);
             lucky_task = task_id;
             mvwprintw (win, outputLine++, 3, "Luck Task = %d", lucky_task);
-            dump(1);
-            sched_ptr->yield(schedWin);
-            dump(1);
+            dump(1, win);
+            sched_ptr->yield(schedWin, sema_queue);
+            dump(1, win);
         }
     }
     pthread_mutex_unlock(&mutex);

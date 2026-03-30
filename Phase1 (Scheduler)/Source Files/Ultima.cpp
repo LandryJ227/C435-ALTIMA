@@ -1,4 +1,3 @@
-#include "Ultima.h"
 #include "scheduler.h"
 #include "Sema.h"
 #include <iostream>
@@ -26,16 +25,17 @@ struct ThreadArgs {
 
 WINDOW * semaDumpWin;
 WINDOW* outputWin;
+WINDOW * schedDumpWin;
+scheduler sched;
 int main() {
     pthread_t thread1ID, thread2ID, thread3ID, thread4ID, thread5ID;
-    scheduler sched;
     semaphore screenSema(1, "threadWin", &sched);
     //create windows for output
     initscr();
     WINDOW * outputWinOuter = newwin(50, 80, 3, 2);
     outputWin = newwin(47, 78, 6, 3);
     WINDOW * threadWin = newwin(10, 80, 3, 85);
-    WINDOW * schedDumpWin = newwin(15, 80, 13, 85);
+    schedDumpWin = newwin(15, 80, 13, 85);
     semaDumpWin = newwin(25, 80, 28, 85);
     //draw borders
     box(outputWinOuter, 0, 0);
@@ -97,6 +97,7 @@ void* thread1Fun(void* arg) {
     int taskID = args->taskID;
 
     sem->down(taskID, semaDumpWin, outputWin);
+    sched.dump(schedDumpWin);
     //call down to check semaphore
     pthread_mutex_lock(&ncurses_mutex);
     //output to window
@@ -105,6 +106,7 @@ void* thread1Fun(void* arg) {
     pthread_mutex_unlock(&ncurses_mutex);
     sleep(2);
     sem->up(semaDumpWin, outputWin);
+    sched.dump(schedDumpWin);
     return nullptr;
 }
 //functions for rest of threads are identical
@@ -115,12 +117,14 @@ void* thread2Fun(void* arg) {
     int taskID = args->taskID;
 
     sem->down(taskID, semaDumpWin, outputWin);
+    sched.dump(schedDumpWin);
     pthread_mutex_lock(&ncurses_mutex);
     mvwprintw(win, 5, 30, "Hello from thread 2");
     wrefresh(win);
     pthread_mutex_unlock(&ncurses_mutex);
     sleep(2);
     sem->up(semaDumpWin, outputWin);
+    sched.dump(schedDumpWin);
     return nullptr;
 }
 void* thread3Fun(void* arg) {
@@ -130,12 +134,14 @@ void* thread3Fun(void* arg) {
     int taskID = args->taskID;
 
     sem->down(taskID, semaDumpWin, outputWin);
+    sched.dump(schedDumpWin);
     pthread_mutex_lock(&ncurses_mutex);
     mvwprintw(win, 6, 30, "Hello from thread 3");
     wrefresh(win);
     pthread_mutex_unlock(&ncurses_mutex);
     sleep(2);
     sem->up(semaDumpWin, outputWin);
+    sched.dump(schedDumpWin);
     return nullptr;
 }
 
@@ -146,12 +152,14 @@ void* thread4Fun(void* arg) {
     int taskID = args->taskID;
 
     sem->down(taskID, semaDumpWin, outputWin);
+    sched.dump(schedDumpWin);
     pthread_mutex_lock(&ncurses_mutex);
     mvwprintw(win, 7, 30, "Hello from thread 4");
     wrefresh(win);
     pthread_mutex_unlock(&ncurses_mutex);
     sleep(2);
     sem->up(semaDumpWin, outputWin);
+    sched.dump(schedDumpWin);
     return nullptr;
 }
 void* thread5Fun(void* arg) {
@@ -161,11 +169,13 @@ void* thread5Fun(void* arg) {
     int taskID = args->taskID;
 
     sem->down(taskID, semaDumpWin, outputWin);
+    sched.dump(schedDumpWin);
     pthread_mutex_lock(&ncurses_mutex);
     mvwprintw(win, 8, 30, "Hello from thread 5");
     wrefresh(win);
     pthread_mutex_unlock(&ncurses_mutex);
     sleep(2);
     sem->up(semaDumpWin, outputWin);
+    sched.dump(schedDumpWin);
     return nullptr;
 }

@@ -49,3 +49,8 @@ void queue::printQueue() {
         }
     }
 }
+
+
+int queue::peek() {
+    return taskQueue[head];
+}

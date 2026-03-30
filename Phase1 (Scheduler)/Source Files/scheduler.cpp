@@ -1,5 +1,4 @@
 #include "scheduler.h"
-#include "tcb.h"
 #include <cstring>
 #include <string>
 #include <iostream>
@@ -10,6 +9,7 @@
 #include <stdarg.h>
 #include <termios.h>
 #include <fcntl.h>
+#include "Queue.h"
 
 
 using namespace std;
@@ -84,10 +84,10 @@ void scheduler::start(WINDOW* win) {
     sleep(3);
 }
 //#########################################################
-void scheduler::yield(WINDOW* win) {
+void scheduler::yield(WINDOW* win, queue sema_queue) {
     int counter = 0;
-    tcb* currentTCB = process_table;
-    while (currentTCB->task_id != current_task) {
+    tcb* currentTCB = process_table;                //start at front of table
+    while (currentTCB->task_id != current_task) {   //traverse until we find current task
         currentTCB = currentTCB->next;
     }
     mvwprintw(win, outputLine++, 20, "Current Task #%d is trying to Yield.", current_task);
@@ -100,15 +100,21 @@ void scheduler::yield(WINDOW* win) {
         if (currentTCB->state == RUNNING)
             currentTCB->state = READY;
 
+        current_task = sema_queue.peek();
+        while (currentTCB->task_id != current_task && counter < MAX_TASKS-1) {
+            currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
+            counter++;
+        }
+        /*
         current_task = (current_task + 1) % MAX_TASKS;
-        currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
-        while (currentTCB->state != READY && counter < MAX_TASKS -1 ) {
-            current_task = (current_task + 1) % MAX_TASKS;
+        currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);//go to next task in tcb
+        while (currentTCB->state != READY && counter < MAX_TASKS -1 ) {//while we find tasks that are not ready or go thru all tasks
+            current_task = (current_task + 1) % MAX_TASKS;             //go to next task
             currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
             counter ++;
-        }
+        }*/
 
-        if (counter < MAX_TASKS - 1 && currentTCB->state == READY) {
+        if (counter < MAX_TASKS - 1 && currentTCB->task_id == current_task) {
             currentTCB->start_time = clock();
             currentTCB->state = RUNNING;
             mvwprintw(win, outputLine++, 20, "Started Running Task #%d", current_task);

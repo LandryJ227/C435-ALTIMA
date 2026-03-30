@@ -43,7 +43,7 @@ public:
     int next_available_task_id=0;
     tcb task_table[MAX_TASKS];
 
-    void dump(WINDOW* win);
+    void dump();
     scheduler();
     ~scheduler();
     void set_quantum(long quantum);
@@ -52,10 +52,10 @@ public:
     string get_state(int the_taskid);
     clock_t get_start_time(int T_ID);
     int get_task_id();
-    void start(WINDOW* win);
-    int create_task(string name, WINDOW* win);
+    void start();
+    int create_task(string name);
     void kill_task(int T_ID);
-    void yield(WINDOW* win, queue sema_queue);
+    void yield (queue sema_queue);
     void garbage_collect(int T_ID);
 
 };

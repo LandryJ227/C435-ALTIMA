@@ -98,6 +98,7 @@ int main() {
     sched.kill_task(2);
     sched.set_state(3, "RUNNING");*/
     sched.dump(schedDumpWin);
+    
 
     int thread1 = pthread_create(&thread1ID, nullptr, thread1Fun, &args1);
     int thread2 = pthread_create(&thread2ID, nullptr, thread2Fun, &args2);

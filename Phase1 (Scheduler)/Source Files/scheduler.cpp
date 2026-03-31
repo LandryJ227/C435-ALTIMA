@@ -81,45 +81,49 @@ void scheduler::start() {
 void scheduler::yield() {
     int counter = 0;
     tcb* currentTCB = process_table;                //start at front of table
-    while (currentTCB->task_id != current_task) {   //traverse until we find current task
+
+    while (currentTCB->task_id != current_task && currentTCB->task_id != current_task) {   //traverse until we find current task
         currentTCB = currentTCB->next;
     }
+
+    if (currentTCB == nullptr) {
+        cout << "Current task not found." << endl;
+        return;
+    }
+
     cout << "Current Task #" << current_task << " is trying to Yield." << endl;
+
     clock_t elapsed_time = clock() - get_start_time(current_task);
     cout << "Task: " << current_task << ". Elapsed time: " << elapsed_time << endl;
     cout << "Current Quantum: " << current_quantum << endl;
 
-    if (elapsed_time >= current_quantum) {
-        cout << "Yielding....(Switching from task #" << current_task << " to next ready task" << endl;
-        if (currentTCB->state == RUNNING)
-            currentTCB->state = READY;
-
-        //current_task = sema_queue.peek();
-        /*
-        while (currentTCB->task_id != current_task && counter < MAX_TASKS-1) {
-            currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
-            counter++;
-        }
-        */
-
-        current_task = (current_task + 1) % MAX_TASKS;
-        currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);//go to next task in tcb
-        while (currentTCB->state != READY && counter < MAX_TASKS -1 ) {//while we find tasks that are not ready or go thru all tasks
-            current_task = (current_task + 1) % MAX_TASKS;             //go to next task
-            currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
-            counter ++;
-        }
-
-        if (counter < MAX_TASKS - 1 && currentTCB->task_id == current_task) {
-            currentTCB->start_time = clock();
-            currentTCB->state = RUNNING;
-            cout << "Started Running Task #" << current_task << endl;
-        }
-        else {
-            cout << "POSSIBLE DEAD LOCK" << endl;
-        }
+    if (elapsed_time < current_quantum) {
+        cout << "NO Yield! (Task: " << current_task << " still has some quantum left)" << endl;
+        return;
     }
-    else cout << "NO Yield! (Task: "<< current_task << " still have some quantum left" << endl;
+
+    cout << "Yielding....(Switching from task #" << current_task << " to next ready task)" << endl;
+
+    tcb* nextTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
+
+    while (nextTCB != currentTCB && nextTCB->state != "READY") {
+
+        if (nextTCB->next == nullptr)
+            nextTCB = process_table;
+        else
+            nextTCB = nextTCB->next;
+        counter++;
+    }
+
+    if (nextTCB->state == "READY" && nextTCB != currentTCB) {
+        currentTCB->state = "READY";
+        current_task = nextTCB->task_id;
+        nextTCB->start_time = clock();
+        nextTCB->state = "RUNNING";
+        cout << "Started Running Task #" << current_task << endl;
+    } else {
+        cout << "No other READY task found." << endl;
+    }
 }
 
 //#########################################################
@@ -196,9 +200,8 @@ void scheduler::dump() {
     tcb* ptrTCB = process_table;
 
     while (ptrTCB != nullptr) {
-        cout << ptrTCB->task_id << " \t" << ptrTCB->start_time << "\t\t" << ptrTCB->state << "\n";
+        cout << ptrTCB->task_id << " \t" <<(clock() - ptrTCB->start_time) << "\t\t" << ptrTCB->state << "\n";
         ptrTCB = ptrTCB->next;
-        sleep(1);
     }
     cout << "----------------------------------------\n";
     sleep(5);

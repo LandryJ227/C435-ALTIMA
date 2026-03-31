@@ -55,9 +55,11 @@ void* thread1Fun(void* arg) {
 
     sem->down(taskID);
     sched.dump();
-    //call down to check semaphore
+    sched.yield();
     cout << "Hello from thread 1" << endl;
     sched.dump();
+
+
     sem->up();
     sleep(2);
     return nullptr;
@@ -69,11 +71,14 @@ void* thread2Fun(void* arg) {
     int taskID = args->taskID;
 
     sem->down(taskID);
+
     sched.dump();
-    //call down to check semaphore
+    sched.yield();
     cout << "Hello from thread 2" << endl;
     sched.dump();
+
     sem->up();
+
     sleep(2);
     return nullptr;
 }

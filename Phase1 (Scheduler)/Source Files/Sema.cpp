@@ -35,7 +35,7 @@ void semaphore::down(int taskID) {
             cout << "Block : " << taskID << " and place into semaphore queue" << endl;
             dump(1);
             pthread_cond_wait(&cond, &mutex);
-            sched_ptr->yield(sema_queue);
+            sched_ptr->yield();
             dump(1);
         }
     }
@@ -46,7 +46,7 @@ void semaphore::up()
 {
     pthread_mutex_lock(&mutex);
     int task_id;
-    cout <<  "TaskID : %d, LuckID : %d" <<  sched_ptr->get_task_id() << lucky_task;
+    cout <<  "TaskID :" << sched_ptr->get_task_id() << ", LuckID : "  << lucky_task;
 
     if(sched_ptr->get_task_id() == lucky_task)
     {
@@ -62,7 +62,7 @@ void semaphore::up()
             lucky_task = task_id;
             cout << "Luck Task = " << lucky_task << endl;
             dump(1);
-            sched_ptr->yield(sema_queue);
+            sched_ptr->yield();
             dump(1);
             pthread_cond_signal(&cond);
         }

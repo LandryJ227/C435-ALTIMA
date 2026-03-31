@@ -23,7 +23,6 @@ semaphore screenSema(1, "threadWin", &sched);
 int main() {
     pthread_t thread1ID, thread2ID;
 
-
     sched.start();
 
     //create tasks
@@ -58,9 +57,9 @@ void* thread1Fun(void* arg) {
     sched.dump();
     //call down to check semaphore
     cout << "Hello from thread 1" << endl;
-    sleep(2);
-    sem->up();
     sched.dump();
+    sem->up();
+    sleep(2);
     return nullptr;
 }
 void* thread2Fun(void* arg) {
@@ -73,8 +72,8 @@ void* thread2Fun(void* arg) {
     sched.dump();
     //call down to check semaphore
     cout << "Hello from thread 2" << endl;
-    sleep(2);
-    sem->up();
     sched.dump();
+    sem->up();
+    sleep(2);
     return nullptr;
 }

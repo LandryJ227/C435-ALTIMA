@@ -1,14 +1,9 @@
 #include "scheduler.h"
-#include <cstring>
 #include <string>
 #include <iostream>
 #include <unistd.h>
 #include <ctime>
 #include <time.h>
-#include <ncurses.h>
-#include <stdarg.h>
-#include <termios.h>
-#include <fcntl.h>
 #include "Queue.h"
 
 
@@ -83,7 +78,7 @@ void scheduler::start() {
     sleep(3);
 }
 //#########################################################
-void scheduler::yield(queue sema_queue) {
+void scheduler::yield() {
     int counter = 0;
     tcb* currentTCB = process_table;                //start at front of table
     while (currentTCB->task_id != current_task) {   //traverse until we find current task
@@ -91,27 +86,29 @@ void scheduler::yield(queue sema_queue) {
     }
     cout << "Current Task #" << current_task << " is trying to Yield." << endl;
     clock_t elapsed_time = clock() - get_start_time(current_task);
-    cout << "Task: " << current_task << ". Elapsed time: " << elapsed_time;
-    cout << "Current Quantum: " << current_quantum;
+    cout << "Task: " << current_task << ". Elapsed time: " << elapsed_time << endl;
+    cout << "Current Quantum: " << current_quantum << endl;
 
     if (elapsed_time >= current_quantum) {
-        cout << "Yielding....(Switching from task #" << current_task << " to next ready task";
+        cout << "Yielding....(Switching from task #" << current_task << " to next ready task" << endl;
         if (currentTCB->state == RUNNING)
             currentTCB->state = READY;
 
         //current_task = sema_queue.peek();
+        /*
         while (currentTCB->task_id != current_task && counter < MAX_TASKS-1) {
             currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
             counter++;
         }
-        /*
+        */
+
         current_task = (current_task + 1) % MAX_TASKS;
         currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);//go to next task in tcb
         while (currentTCB->state != READY && counter < MAX_TASKS -1 ) {//while we find tasks that are not ready or go thru all tasks
             current_task = (current_task + 1) % MAX_TASKS;             //go to next task
             currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
             counter ++;
-        }*/
+        }
 
         if (counter < MAX_TASKS - 1 && currentTCB->task_id == current_task) {
             currentTCB->start_time = clock();
@@ -138,7 +135,7 @@ int scheduler::create_task(string name) {
     tcb* newTask = new tcb();                       //new task
     newTask->next = nullptr;
     newTask->taskName = name;                       //set name of task
-    newTask->state = "READY";                       //set state of task
+    newTask->state = READY;                       //set state of task
     newTask->start_time = clock();                  //set start time of task
     newTask->task_id = next_available_task_id++;    //inc next task id
 

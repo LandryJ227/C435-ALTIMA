@@ -55,7 +55,7 @@ public:
     void start();
     int create_task(string name);
     void kill_task(int T_ID);
-    void yield (queue sema_queue);
+    void yield ();
     void garbage_collect(int T_ID);
 
 };

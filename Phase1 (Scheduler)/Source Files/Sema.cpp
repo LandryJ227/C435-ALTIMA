@@ -34,9 +34,9 @@ void semaphore::down(int taskID) {
             sched_ptr->set_state(taskID, "BLOCKED");
             cout << "Block : " << taskID << " and place into semaphore queue" << endl;
             dump(1);
-            pthread_cond_wait(&cond, &mutex);
-            sched_ptr->yield();
-            dump(1);
+            while (taskID != lucky_task) {
+                pthread_cond_wait(&cond, &mutex);
+            }
         }
     }
     pthread_mutex_unlock(&mutex);
@@ -46,7 +46,7 @@ void semaphore::up()
 {
     pthread_mutex_lock(&mutex);
     int task_id;
-    cout <<  "TaskID :" << sched_ptr->get_task_id() << ", LuckID : "  << lucky_task;
+    cout <<  "TaskID : " << sched_ptr->get_task_id() << ", LuckID : "  << lucky_task << endl;
 
     if(sched_ptr->get_task_id() == lucky_task)
     {
@@ -61,8 +61,6 @@ void semaphore::up()
             cout << "UnBlock  : " << task_id << " and release from the queue" << endl;
             lucky_task = task_id;
             cout << "Luck Task = " << lucky_task << endl;
-            dump(1);
-            sched_ptr->yield();
             dump(1);
             pthread_cond_signal(&cond);
         }

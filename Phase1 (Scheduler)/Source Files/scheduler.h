@@ -1,0 +1,61 @@
+#pragma once
+#include <string>
+#include "scheduler.h"
+#include <iostream>
+#include <assert.h>
+#include <time.h>
+#include <ncurses.h>
+#include <stdarg.h>
+#include <termios.h>
+#include <fcntl.h>
+#include "Queue.h"
+
+using namespace std;
+
+struct tcb {
+    int task_id;
+    string taskName;
+    string state;
+    clock_t start_time;
+    tcb *next;
+};
+
+const string READY = "READY";
+const string RUNNING = "RUNNING";
+const string BLOCKED = "BLOCKED";
+const string DEAD = "DEAD";
+static const int MAX_TASKS = 5;
+
+class scheduler {
+public:
+
+    const string READY = "READY";
+    const string RUNNING = "RUNNING";
+    const string BLOCKED = "BLOCKED";
+    const string DEAD = "DEAD";
+    static const int MAX_TASKS = 5;
+
+    tcb *process_table;
+    int numOfTasks=0;
+    int outputLine = 5;
+    int current_task;
+    long current_quantum;
+    int next_available_task_id=0;
+    tcb task_table[MAX_TASKS];
+
+    void dump();
+    scheduler();
+    ~scheduler();
+    void set_quantum(long quantum);
+    long get_quantum();
+    void set_state(int the_taskid, string the_state);
+    string get_state(int the_taskid);
+    clock_t get_start_time(int T_ID);
+    int get_task_id();
+    void start();
+    int create_task(string name);
+    void kill_task(int T_ID);
+    void yield ();
+    void garbage_collect(int T_ID);
+
+};

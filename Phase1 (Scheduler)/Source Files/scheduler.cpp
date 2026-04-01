@@ -172,6 +172,7 @@ void scheduler::kill_task(int T_ID) {
         ptrTCB = ptrTCB->next;
     }
     ptrTCB->state = DEAD;
+    garbage_collect(T_ID);
 }
 //#########################################################
 void scheduler::garbage_collect(int T_ID) {

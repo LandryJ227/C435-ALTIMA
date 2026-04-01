@@ -26,17 +26,21 @@ int main() {
     sched.start();
 
     //create tasks
+    cout << "First we will create 3 tasks:\n";
+    cout << "-----------------------------\n";
     int task1 = sched.create_task("File Explorer");
     int task2 = sched.create_task("Task Manager");
-    sched.dump();
-    //sched.kill_task(1);
-    //sched.dump();
-    //int task3 = sched.create_task("Email");
-    //sched.dump();
+    int task3 = sched.create_task("Chrome");
     //output process table
+    sched.dump();
+    //kill a task
+    cout << "Now we will kill the 3rd task created:\n";
+    cout << "--------------------------------------\n";
+    sched.kill_task(task3);
+    //output process table after kill
+    sched.dump();
 
     //create threads
-
     ThreadArgs args1{ &screenSema, task1};
     ThreadArgs args2{ &screenSema, task2};
     int thread1 = pthread_create(&thread1ID, nullptr, thread1Fun, &args1);
@@ -56,7 +60,9 @@ void* thread1Fun(void* arg) {
     sem->down(taskID);
     sched.dump();
     sched.yield();
-    cout << "Hello from thread 1" << endl;
+    cout << "\n-----------------------" << endl;
+    cout << "| Hello from thread 1 |" << endl;
+    cout << "-----------------------" << endl;
     sched.dump();
 
 
@@ -74,7 +80,9 @@ void* thread2Fun(void* arg) {
 
     sched.dump();
     sched.yield();
-    cout << "Hello from thread 2" << endl;
+    cout << "\n-----------------------" << endl;
+    cout << "| Hello from thread 2 |" << endl;
+    cout << "-----------------------" << endl;
     sched.dump();
 
     sem->up();

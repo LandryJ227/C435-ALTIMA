@@ -12,6 +12,11 @@ using namespace std;
 
 void* thread1Fun(void* arg);
 void* thread2Fun(void* arg);
+WINDOW *create_window(int height, int width, int starty, int startx);
+void write_window(WINDOW * Win, const char* text);
+void write_window(WINDOW * Win, int y, int x, const char* text);
+
+
 
 struct ThreadArgs {
     semaphore* sem;
@@ -21,6 +26,34 @@ scheduler sched;
 semaphore screenSema(1, "threadWin", &sched);
 
 int main() {
+    initscr();
+    WINDOW * outputWin = create_window(51, 55, 1, 1);
+    WINDOW * threadWin = create_window(17, 55, 1, 57);
+    WINDOW * schedWin = create_window(17, 55, 1, 113);
+    WINDOW * semaWin = create_window(17, 55, 18, 113);
+    WINDOW * messWin = create_window(17, 55, 35, 113);
+
+    write_window(schedWin, )
+
+
+    sleep(100);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     pthread_t thread1ID, thread2ID;
 
     sched.start();
@@ -93,3 +126,36 @@ void* thread2Fun(void* arg) {
     sleep(2);
     return nullptr;
 }
+
+
+
+
+
+
+
+
+WINDOW *create_window(int height, int width, int starty, int startx) {
+    WINDOW *Win;
+    Win = newwin(height, width, starty, startx);
+    scrollok(Win, TRUE); // Allow scrolling of the window
+    scroll(Win); // scroll the window
+    box(Win, 0 , 0); // 0, 0 gives default characters
+    // for the vertical and horizontal lines
+    wrefresh(Win); // draw the window
+    return Win;
+}
+//----------------------------------------------------------------
+void write_window(WINDOW * Win, const char* text)
+{
+    wprintw(Win, text);
+    box(Win, 0 , 0);
+    wrefresh(Win); // draw the window
+}
+//----------------------------------------------------------------
+void write_window(WINDOW * Win, int y, int x, const char* text)
+{
+    mvwprintw(Win, y, x, text);
+    box(Win, 0 , 0);
+    wrefresh(Win); // draw the window
+}
+//----------------------------------------------------------------

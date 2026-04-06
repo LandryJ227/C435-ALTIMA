@@ -56,7 +56,7 @@ public:
     void start(WINDOW* win);
     int create_task(string name, WINDOW* win);
     void kill_task(int T_ID);
-    void yield ();
+    void yield (WINDOW* win);
     void garbage_collect(int T_ID);
 
 };

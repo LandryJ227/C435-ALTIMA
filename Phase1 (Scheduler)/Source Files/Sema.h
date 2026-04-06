@@ -17,9 +17,9 @@ public:
     semaphore(int starting_value, string name, scheduler *theScheduler);
     ~semaphore();
 
-    void down(int taskID);
-    void up();
-    void dump(int level);
+    void down(int taskID, WINDOW* win, WINDOW* dumpWin);
+    void up(WINDOW* win, WINDOW* dumpWin);
+    void dump(int level, WINDOW* win);
     pthread_mutex_t mutex;
     pthread_cond_t cond;
 };

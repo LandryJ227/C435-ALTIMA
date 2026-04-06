@@ -18,7 +18,7 @@ scheduler::scheduler() {
 }
 //#########################################################
 scheduler::~scheduler() {
-    cout << "Exiting scheduler..." << endl;
+    //cout << "Exiting scheduler..." << endl;
 }
 //#########################################################
 void scheduler::set_quantum(long quantum) {
@@ -79,7 +79,7 @@ void scheduler::start(WINDOW* win) {
     sleep(3);
 }
 //#########################################################
-void scheduler::yield() {
+void scheduler::yield(WINDOW* win) {
     int counter = 0;
     tcb* currentTCB = process_table;                //start at front of table
 
@@ -88,22 +88,21 @@ void scheduler::yield() {
     }
 
     if (currentTCB == nullptr) {
-        cout << "Current task not found." << endl;
+        write_window(win, outputWriteLine++, 12, "Current task not found.");
         return;
     }
 
-    cout << "Current Task #" << current_task << " is trying to Yield." << endl;
+   mvwprintw(win, outputWriteLine++, 12, "Current Task #%d is trying to Yield", current_task);
 
     clock_t elapsed_time = clock() - get_start_time(current_task);
-    cout << "Task: " << current_task << ". Elapsed time: " << elapsed_time << endl;
-    cout << "Current Quantum: " << current_quantum << endl;
+    mvwprintw(win, outputWriteLine++, 12, "Task: %d. Elapsed time: %d.", current_task, elapsed_time);
+    mvwprintw(win, outputWriteLine++, 12, "Current Quantum: %d", current_quantum);
 
     if (elapsed_time < current_quantum) {
-        cout << "NO Yield! (Task: " << current_task << " still has some quantum left)" << endl;
-        return;
+        mvwprintw(win, outputWriteLine++, 12, "NO Yield! (Task: %d still has some quantum left)", current_task);
     }
 
-    cout << "Yielding....(Switching from task #" << current_task << " to next ready task)" << endl;
+    mvwprintw(win, outputWriteLine++, 12, "Yielding....(Switching from task #%d to next ready task", current_task);
 
     tcb* nextTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
 
@@ -121,10 +120,12 @@ void scheduler::yield() {
         current_task = nextTCB->task_id;
         nextTCB->start_time = clock();
         nextTCB->state = "RUNNING";
-        cout << "Started Running Task #" << current_task << endl;
+        mvwprintw(win, outputWriteLine++, 12,  "Started Running Task #%d", current_task);
     } else {
-        cout << "No other READY task found." << endl;
+        write_window(win, outputWriteLine++, 12, "No other READY task found.");
     }
+    box(win, 0 , 0);
+    wrefresh(win);
 }
 
 //#########################################################

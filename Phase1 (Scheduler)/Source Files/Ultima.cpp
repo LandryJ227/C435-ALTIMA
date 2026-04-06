@@ -59,7 +59,6 @@ int main() {
     sched.kill_task(task3);
     //output process table after kill
     sched.dump(schedWin);
-    sleep(1000);
     //create threads
     ThreadArgs args1{ &screenSema, task1};
     ThreadArgs args2{ &screenSema, task2};
@@ -72,44 +71,44 @@ int main() {
 
 //functions for each thread
 void* thread1Fun(void* arg) {
-    cout << "\n\n-----------------------Start of Thread 1-----------------------" << endl;
+    //cout << "\n\n-----------------------Start of Thread 1-----------------------" << endl;
     //initialize variables and objects needed
     ThreadArgs* args = (ThreadArgs*)arg;
     semaphore* sem = args->sem;
     int taskID = args->taskID;
 
-    sem->down(taskID);
+    sem->down(taskID, outputWin, semaWin);
     sched.dump(schedWin);
-    sched.yield();
-    cout << "\n-----------------------" << endl;
-    cout << "| Hello from thread 1 |" << endl;
-    cout << "-----------------------" << endl;
+    sched.yield(outputWin);
+    write_window(threadWin, 4,8, "-----------------------");
+    write_window(threadWin, 5,8, "| Hello from thread 1 |");
+    write_window(threadWin, 6,8, "-----------------------");
     sched.dump(schedWin);
 
 
-    sem->up();
-    cout << "\n-----------------------End of Thread 1-----------------------\n\n" << endl;
+    sem->up(outputWin, semaWin);
+    //cout << "\n-----------------------End of Thread 1-----------------------\n\n" << endl;
     sleep(2);
     return nullptr;
 }
 void* thread2Fun(void* arg) {
-    cout << "\n\n-----------------------Start of Thread 2-----------------------" << endl;
+    //cout << "\n\n-----------------------Start of Thread 2-----------------------" << endl;
     //initialize variables and objects needed
     ThreadArgs* args = (ThreadArgs*)arg;
     semaphore* sem = args->sem;
     int taskID = args->taskID;
 
-    sem->down(taskID);
+    sem->down(taskID, outputWin, semaWin);
 
     sched.dump(schedWin);
-    sched.yield();
-    cout << "\n-----------------------" << endl;
-    cout << "| Hello from thread 2 |" << endl;
-    cout << "-----------------------" << endl;
+    sched.yield(outputWin);
+    write_window(threadWin, 4,8, "-----------------------");
+    write_window(threadWin, 5,8, "| Hello from thread 2 |");
+    write_window(threadWin, 6,8, "-----------------------");
     sched.dump(schedWin);
 
-    sem->up();
-    cout << "\n-----------------------End of Thread 2-----------------------\n\n" << endl;
+    sem->up(outputWin, semaWin);
+    //cout << "\n-----------------------End of Thread 2-----------------------\n\n" << endl;
     sleep(2);
     return nullptr;
 }

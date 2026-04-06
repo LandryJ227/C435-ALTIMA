@@ -26,6 +26,7 @@ const string BLOCKED = "BLOCKED";
 const string DEAD = "DEAD";
 static const int MAX_TASKS = 5;
 
+
 class scheduler {
 public:
 
@@ -43,7 +44,7 @@ public:
     int next_available_task_id=0;
     tcb task_table[MAX_TASKS];
 
-    void dump();
+    void dump(WINDOW* win);
     scheduler();
     ~scheduler();
     void set_quantum(long quantum);
@@ -52,8 +53,8 @@ public:
     string get_state(int the_taskid);
     clock_t get_start_time(int T_ID);
     int get_task_id();
-    void start();
-    int create_task(string name);
+    void start(WINDOW* win);
+    int create_task(string name, WINDOW* win);
     void kill_task(int T_ID);
     void yield ();
     void garbage_collect(int T_ID);

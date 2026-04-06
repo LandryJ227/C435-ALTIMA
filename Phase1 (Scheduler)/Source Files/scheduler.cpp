@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <ctime>
 #include <time.h>
+#include "Ultima.h"
 #include "Queue.h"
 
 
@@ -69,8 +70,8 @@ int scheduler::get_task_id() {
     return current_task;
 }
 //#########################################################
-void scheduler::start() {
-    cout << "..........SCHEDULING STARTED..........\n";
+void scheduler::start(WINDOW* win) {
+    write_window(win, outputWriteLine++,8, "..........SCHEDULING STARTED..........\n");
     //task_table[0].start_time = clock();
     //task_table[0].state = RUNNING;
     current_task = 0;
@@ -127,11 +128,13 @@ void scheduler::yield() {
 }
 
 //#########################################################
-int scheduler::create_task(string name) {
-    cout << "Creating task #" << next_available_task_id << endl;
+int scheduler::create_task(string name, WINDOW* win) {
+    mvwprintw(win, outputWriteLine++, 12, "Creating task #%d...", next_available_task_id);
+    box(win, 0 , 0);
+    wrefresh(win);
     sleep(1);
     if (next_available_task_id == MAX_TASKS) {      //check if exeeding max tasks
-        cout << "FAILED: Available tasks exeeded." << endl;
+        write_window(win, outputWriteLine++,12,  "FAILED: Available tasks exeeded.");
         sleep(1);
         return (-1);                                //return -1 for error
     }
@@ -145,7 +148,9 @@ int scheduler::create_task(string name) {
 
     if (process_table == nullptr) {                 //if no tasks yet
         process_table = newTask;                    //process_table will point to this task
-        cout << "Successfully created task #" << newTask->task_id << endl;
+        mvwprintw(win, outputWriteLine++, 12, "Successfully created task #%d!", newTask->task_id);
+        box(win, 0 , 0);
+        wrefresh(win);
         sleep(1);
         return newTask->task_id;
     }
@@ -156,7 +161,9 @@ int scheduler::create_task(string name) {
     }
     ptrTCB->next = newTask;                      //add this new task to the end of process list
 
-    cout << "Successfully created task #" << newTask->task_id << endl;
+    mvwprintw(win, outputWriteLine++,12,  "Successfully created task #%d!", newTask->task_id);
+    box(win, 0 , 0);
+    wrefresh(win);
     sleep(1);
     return newTask->task_id;                      //return the task id
 }
@@ -192,18 +199,19 @@ void scheduler::garbage_collect(int T_ID) {
 }
 //#########################################################
 
-void scheduler::dump() {
-    cout << "\n\nSCHEDULER DUMP" << endl;
-    cout << "--------------" << endl;
-    cout <<  "Quantum = " << current_quantum << endl;
-    cout << "Task-ID\t Elapsed Time\tState" << endl;
-
+void scheduler::dump(WINDOW* win) {
+    int count = 6;
+    wclear(win);
+    write_window(win, 1, 15, "--- Scheduler Dump Win ---");
+    mvwprintw(win, 4, 4, "Quantum = %d", current_quantum);
+    write_window(win, 5, 4,  "Task-ID  Task Name     Elapsed Time   State");
     tcb* ptrTCB = process_table;
-
+    write_window(win, count++, 4, "-------------------------------------------");
     while (ptrTCB != nullptr) {
-        cout << ptrTCB->task_id << " \t" <<(clock() - ptrTCB->start_time) << "\t\t" << ptrTCB->state << "\n";
+        mvwprintw(win, count, 4, "   %d     %s      ", ptrTCB->task_id, ptrTCB->taskName.c_str());
+        mvwprintw(win, count++, 33, "%d        %s", (clock() - ptrTCB->start_time), ptrTCB->state.c_str());
         ptrTCB = ptrTCB->next;
     }
-    cout << "----------------------------------------\n\n";
+    write_window(win, count, 4, "-------------------------------------------");
     sleep(2);
 }

@@ -1,5 +1,6 @@
 #include "scheduler.h"
 #include "Sema.h"
+#include "Ultima.h"
 #include <iostream>
 #include <unistd.h>
 #include <pthread.h>
@@ -12,9 +13,7 @@ using namespace std;
 
 void* thread1Fun(void* arg);
 void* thread2Fun(void* arg);
-WINDOW *create_window(int height, int width, int starty, int startx);
-void write_window(WINDOW * Win, const char* text);
-void write_window(WINDOW * Win, int y, int x, const char* text);
+
 
 
 
@@ -26,53 +25,41 @@ scheduler sched;
 semaphore screenSema(1, "threadWin", &sched);
 
 int main() {
-    initscr();
-    WINDOW * outputWin = create_window(51, 55, 1, 1);
-    WINDOW * threadWin = create_window(17, 55, 1, 57);
-    WINDOW * schedWin = create_window(17, 55, 1, 113);
-    WINDOW * semaWin = create_window(17, 55, 18, 113);
-    WINDOW * messWin = create_window(17, 55, 35, 113);
+    initscr();//start ncurses
+    //------------------- CREATE WINDOWS -------------------
+    outputWin = create_window(51, 55, 1, 1);
+    threadWin = create_window(17, 55, 1, 57);
+    schedWin = create_window(17, 55, 1, 113);
+    semaWin = create_window(17, 55, 18, 113);
+    messWin = create_window(17, 55, 35, 113);
 
-    write_window(schedWin, )
-
-
-    sleep(100);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    //------------------- LABEL WINDOWS -------------------
+    write_window(outputWin, 1,17, "--- Output Window ---");
+    write_window(schedWin, 1, 15, "--- Scheduler Dump Win ---");
+    write_window(semaWin, 1, 15, "--- Semaphore Dump Win ---");
+    write_window(messWin, 1, 16, "--- Message Dump Win ---");
 
     pthread_t thread1ID, thread2ID;
 
-    sched.start();
+    sched.start(outputWin);
 
     //create tasks
-    cout << "First we will create 3 tasks:\n";
-    cout << "-----------------------------\n";
-    int task1 = sched.create_task("File Explorer");
-    int task2 = sched.create_task("Task Manager");
-    int task3 = sched.create_task("Chrome");
+    outputWriteLine++;
+    write_window(outputWin, outputWriteLine++,12, "First we will create 3 tasks:\n");
+    write_window(outputWin, outputWriteLine++,12, "-----------------------------\n");
+    int task1 = sched.create_task("File Explorer", outputWin);
+    int task2 = sched.create_task("Task Manager", outputWin);
+    int task3 = sched.create_task("Chrome", outputWin);
     //output process table
-    sched.dump();
+    sched.dump(schedWin);
     //kill a task
-    cout << "Now we will kill the 3rd task created:\n";
-    cout << "--------------------------------------\n";
+    outputWriteLine++;
+    write_window(outputWin, outputWriteLine++,12, "Now we will kill the 3rd task created");
+    write_window(outputWin, outputWriteLine++,12, "-------------------------------------");
     sched.kill_task(task3);
     //output process table after kill
-    sched.dump();
-
+    sched.dump(schedWin);
+    sleep(1000);
     //create threads
     ThreadArgs args1{ &screenSema, task1};
     ThreadArgs args2{ &screenSema, task2};
@@ -92,12 +79,12 @@ void* thread1Fun(void* arg) {
     int taskID = args->taskID;
 
     sem->down(taskID);
-    sched.dump();
+    sched.dump(schedWin);
     sched.yield();
     cout << "\n-----------------------" << endl;
     cout << "| Hello from thread 1 |" << endl;
     cout << "-----------------------" << endl;
-    sched.dump();
+    sched.dump(schedWin);
 
 
     sem->up();
@@ -114,24 +101,18 @@ void* thread2Fun(void* arg) {
 
     sem->down(taskID);
 
-    sched.dump();
+    sched.dump(schedWin);
     sched.yield();
     cout << "\n-----------------------" << endl;
     cout << "| Hello from thread 2 |" << endl;
     cout << "-----------------------" << endl;
-    sched.dump();
+    sched.dump(schedWin);
 
     sem->up();
     cout << "\n-----------------------End of Thread 2-----------------------\n\n" << endl;
     sleep(2);
     return nullptr;
 }
-
-
-
-
-
-
 
 
 WINDOW *create_window(int height, int width, int starty, int startx) {
@@ -159,3 +140,8 @@ void write_window(WINDOW * Win, int y, int x, const char* text)
     wrefresh(Win); // draw the window
 }
 //----------------------------------------------------------------
+
+
+
+
+

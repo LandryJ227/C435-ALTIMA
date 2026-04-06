@@ -204,6 +204,6 @@ void scheduler::dump() {
         cout << ptrTCB->task_id << " \t" <<(clock() - ptrTCB->start_time) << "\t\t" << ptrTCB->state << "\n";
         ptrTCB = ptrTCB->next;
     }
-    cout << "----------------------------------------\n";
-    sleep(5);
+    cout << "----------------------------------------\n\n";
+    sleep(2);
 }

@@ -52,6 +52,7 @@ int main() {
 
 //functions for each thread
 void* thread1Fun(void* arg) {
+    cout << "\n\n-----------------------Start of Thread 1-----------------------" << endl;
     //initialize variables and objects needed
     ThreadArgs* args = (ThreadArgs*)arg;
     semaphore* sem = args->sem;
@@ -67,10 +68,12 @@ void* thread1Fun(void* arg) {
 
 
     sem->up();
+    cout << "\n-----------------------End of Thread 1-----------------------\n\n" << endl;
     sleep(2);
     return nullptr;
 }
 void* thread2Fun(void* arg) {
+    cout << "\n\n-----------------------Start of Thread 2-----------------------" << endl;
     //initialize variables and objects needed
     ThreadArgs* args = (ThreadArgs*)arg;
     semaphore* sem = args->sem;
@@ -86,7 +89,7 @@ void* thread2Fun(void* arg) {
     sched.dump();
 
     sem->up();
-
+    cout << "\n-----------------------End of Thread 2-----------------------\n\n" << endl;
     sleep(2);
     return nullptr;
 }

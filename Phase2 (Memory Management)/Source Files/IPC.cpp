@@ -1,7 +1,11 @@
 #include <time.h>
-
+#include "MCB.h"
+#include "scheduler.h"
 
 class ipc {
+    MCB mcb = nulltpr;
+    void connectMCB(MCB* mcb);
+
     struct Message_Type {
         int Message_Type_Id;
         char Message_Type_Description[64];
@@ -47,3 +51,35 @@ class ipc {
     void ipc_Message_Dump(); // Jacob
 
 };
+
+int Message_Receive(int Task_Id, Message *message) {
+    tcb ptrTCB = mcb->sched.process_table;//start at head of process table
+    while (ptrTCB.task_id != Task_Id && ptr.TCB.next != NULL) {//search for correct tcb with task id
+        ptrTCB = ptrTCB.next;
+    }
+    if (ptrTCB.task_id != Task_Id) return -1;
+
+    ptrTCB.taskMailbox.taskSema.down();                      //check the mailbox semaphore
+    message = ptrTCB.taskMailbox.messageQueue.dequeue();     //grab message from queue
+    ptrTCB.taskMailbox.taskSema.up();                        //free up the semaphore
+    if (ptrTCB.taskMailbox.messageQueue.isEmpty()) return 0; //return 0 if no more messages
+    else return 1;                                           //still messages left in mailbox
+}
+int Message_Receive(int Task_Id, char *Mess, int *Mess_Type) {
+    tcb ptrTCB = mcb->sched.process_table;//start at head of process table
+    while (ptrTCB.task_id != Task_Id && ptr.TCB.next != NULL) {//search for correct tcb with task id
+        ptrTCB = ptrTCB.next;
+    }
+    if (ptrTCB.task_id != Task_Id) return -1;
+
+    ptrTCB.taskMailbox.taskSema.down();                                  //check the mailbox semaphore
+    Message tempMessage = ptrTCB.taskMailbox.messageQueue.dequeue();     //grab message from queue
+    ptrTCB.taskMailbox.taskSema.up();                                    //free up the semaphore
+    Mess = tempMessage.Msg_Text;                                         //load values into ptr parameters
+    Mess_Type = tempMessage.Msg_Type.Message_Type_Id;
+    if (ptrTCB.taskMailbox.messageQueue.isEmpty()) return 0;             //return 0 if no more messages
+    else return 1;                                                       //still messages left in mailbox
+}
+void connectMCB(MCB* mainMCB) {
+    mcb = mainMCB;
+}

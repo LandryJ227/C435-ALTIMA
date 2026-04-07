@@ -19,6 +19,7 @@ struct tcb {
     string state;
     clock_t start_time;
     tcb *next;
+    mailbox taskMailbox;
 };
 struct mailbox {
     Message messageQueue[32];

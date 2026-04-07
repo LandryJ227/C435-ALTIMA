@@ -4,8 +4,8 @@
 #include "IPC.h"
 
 class MCB {
-    scheduler Swapper;
-    IPC Messenger;
+    scheduler sched;
+    IPC messenger;
 };
 
 #endif

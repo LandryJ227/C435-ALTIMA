@@ -16,7 +16,6 @@ class semaphore {
 public:
     semaphore(int starting_value, string name, scheduler *theScheduler);
     ~semaphore();
-
     void down(int taskID, WINDOW* win, WINDOW* dumpWin);
     void up(WINDOW* win, WINDOW* dumpWin);
     void dump(int level, WINDOW* win);

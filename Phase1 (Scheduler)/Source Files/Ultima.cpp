@@ -25,6 +25,7 @@ scheduler sched;
 semaphore screenSema(1, "threadWin", &sched);
 
 int main() {
+    pthread_mutex_init(&winMutex, nullptr);//init mutex
     initscr();//start ncurses
     //------------------- CREATE WINDOWS -------------------
     outputWin = create_window(51, 55, 1, 1);
@@ -66,7 +67,9 @@ int main() {
     int thread2 = pthread_create(&thread2ID, nullptr, thread2Fun, &args2);
     pthread_join(thread1ID, nullptr);
     pthread_join(thread2ID, nullptr);
-
+    sleep(5);
+    endwin();
+    return(0);
 }
 
 //functions for each thread
@@ -134,9 +137,11 @@ void write_window(WINDOW * Win, const char* text)
 //----------------------------------------------------------------
 void write_window(WINDOW * Win, int y, int x, const char* text)
 {
+    pthread_mutex_lock(&winMutex);
     mvwprintw(Win, y, x, text);
     box(Win, 0 , 0);
     wrefresh(Win); // draw the window
+    pthread_mutex_unlock(&winMutex);
 }
 //----------------------------------------------------------------
 

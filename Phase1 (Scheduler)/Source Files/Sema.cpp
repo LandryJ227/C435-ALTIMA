@@ -22,7 +22,8 @@ semaphore::~semaphore() {
 void semaphore::down(int taskID, WINDOW* win, WINDOW* dumpWin) {
     pthread_mutex_lock(&mutex);
     if (taskID == lucky_task) { //taskID already obtained resource.
-        mvwprintw(win, outputWriteLine++, 12, "Task %d already has the resource! Ignore request.", lucky_task);
+        snprintf(tempStr, sizeof(tempStr), "Task %d already has the resource! Ignore request.", lucky_task);
+        write_window(win, outputWriteLine++, 12, tempStr);
         box(win, 0 , 0);
         wrefresh(win);
         dump(1, dumpWin);
@@ -36,7 +37,8 @@ void semaphore::down(int taskID, WINDOW* win, WINDOW* dumpWin) {
         else {
             sema_queue.enqueue(taskID);
             sched_ptr->set_state(taskID, "BLOCKED");
-            mvwprintw(win, outputWriteLine++, 12, "Block: %d and place into semaphore queue", taskID);
+            snprintf(tempStr, sizeof(tempStr), "Block: %d and place into semaphore queue", taskID);
+            write_window(win, outputWriteLine++, 12, tempStr);
             box(win, 0 , 0);
             wrefresh(win);
             dump(1, dumpWin);
@@ -52,7 +54,8 @@ void semaphore::up(WINDOW* win, WINDOW* dumpWin)
 {
     pthread_mutex_lock(&mutex);
     int task_id;
-    mvwprintw(win, outputWriteLine++, 12, "TaskID: %d, LuckID: %d", sched_ptr->get_task_id(), lucky_task);
+    snprintf(tempStr, sizeof(tempStr), "TaskID: %d, LuckID: %d", sched_ptr->get_task_id(), lucky_task);
+    write_window(win, outputWriteLine++, 12, tempStr);
     box(win, 0 , 0);
     wrefresh(win);
 
@@ -66,9 +69,11 @@ void semaphore::up(WINDOW* win, WINDOW* dumpWin)
         else {
             task_id = sema_queue.dequeue();
             sched_ptr->set_state(task_id, READY);
-            mvwprintw(win, outputWriteLine++, 12, "UnBlock: %d and release from the queue", task_id);
+            snprintf(tempStr, sizeof(tempStr), "UnBlock: %d and release from the queue", task_id);
+            write_window(win, outputWriteLine++, 12, tempStr);
             lucky_task = task_id;
-            mvwprintw(win, outputWriteLine++, 12, "Luck Task = %d", lucky_task);
+            snprintf(tempStr, sizeof(tempStr), "Luck Task = %d", lucky_task);
+            write_window(win, outputWriteLine++, 12, tempStr);
             box(win, 0 , 0);
             wrefresh(win);
             dump(1, dumpWin);
@@ -84,19 +89,25 @@ void semaphore::dump(int level, WINDOW* win)
     write_window(win, 1, 15, "--- Semaphore Dump Win ---");
     switch(level) {
         case 0:
-            mvwprintw(win, 3, 1, "Sema_Value: %d", sema_value);
-            mvwprintw(win, 4, 1, "Sema_Name: %s", resource_name.c_str());
-            mvwprintw(win, 5, 1, "Obtained by Task-ID: %d", lucky_task);
+            snprintf(tempStr, sizeof(tempStr), "Sema_Value: %d", sema_value);
+            write_window(win, 3, 1, tempStr);
+            snprintf(tempStr, sizeof(tempStr), "Sema_Name: %s", resource_name.c_str());
+            write_window(win, 4, 1, tempStr);
+            snprintf(tempStr, sizeof(tempStr), "Obtained by Task-ID: %d", lucky_task);
+            write_window(win, 5, 1, tempStr);
             break;
         case 1:
-            mvwprintw(win, 3, 1, "Sema_Value: %d", sema_value);
-            mvwprintw(win, 4, 1,  "Sema_Name: %s", resource_name.c_str());
-            mvwprintw(win, 5, 1, "Obtained by Task-ID: %d", lucky_task);
-            mvwprintw(win, 6, 1, "Sema-Queue: ");
+            snprintf(tempStr, sizeof(tempStr), "Sema_Value: %d", sema_value);
+            write_window(win, 3, 1, tempStr);
+            snprintf(tempStr, sizeof(tempStr), "Sema_Name: %s", resource_name.c_str());
+            write_window(win, 4, 1, tempStr);
+            snprintf(tempStr, sizeof(tempStr), "Obtained by Task-ID: %d", lucky_task);
+            write_window(win, 5, 1, tempStr);
+            write_window(win, 6, 1, "Sema-Queue: ");
             //sema_queue.printQueue();
             break;
         default:
-            mvwprintw(win, 3, 1, "ERROR in SEMAPHORE DUMP level");
+            write_window(win, 3, 1, "ERROR in SEMAPHORE DUMP level");
 
     }
     box(win, 0 , 0);

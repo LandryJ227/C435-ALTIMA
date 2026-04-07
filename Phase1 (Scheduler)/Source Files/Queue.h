@@ -1,5 +1,4 @@
 #pragma once
-#include "tcb.h"
 
 class queue {
 public:
@@ -14,6 +13,8 @@ public:
     void enqueue(int T);
     //Function to remove and return the integer valoue at the front of the queue.
     int dequeue();
+    //Function to retrieve the next item in queue without removing it
+    int peek();
     //Checking if there are elements within the queue.
     bool isEmpty();
     //Formatted display of the content within the queue.

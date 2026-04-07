@@ -1,15 +1,11 @@
 #include "scheduler.h"
-#include "tcb.h"
-#include <cstring>
 #include <string>
 #include <iostream>
 #include <unistd.h>
 #include <ctime>
 #include <time.h>
-#include <ncurses.h>
-#include <stdarg.h>
-#include <termios.h>
-#include <fcntl.h>
+#include "Ultima.h"
+#include "Queue.h"
 
 
 using namespace std;
@@ -22,7 +18,7 @@ scheduler::scheduler() {
 }
 //#########################################################
 scheduler::~scheduler() {
-    cout << "Exiting scheduler..." << endl;
+    //cout << "Exiting scheduler..." << endl;
 }
 //#########################################################
 void scheduler::set_quantum(long quantum) {
@@ -75,8 +71,7 @@ int scheduler::get_task_id() {
 }
 //#########################################################
 void scheduler::start(WINDOW* win) {
-    mvwprintw(win, 3, 20, "..........SCHEDULING STARTED..........\n");
-    wrefresh(win);
+    write_window(win, outputWriteLine++,8, "..........SCHEDULING STARTED..........\n");
     //task_table[0].start_time = clock();
     //task_table[0].state = RUNNING;
     current_task = 0;
@@ -86,57 +81,67 @@ void scheduler::start(WINDOW* win) {
 //#########################################################
 void scheduler::yield(WINDOW* win) {
     int counter = 0;
-    tcb* currentTCB = process_table;
-    while (currentTCB->task_id != current_task) {
+    tcb* currentTCB = process_table;                //start at front of table
+
+    while (currentTCB->task_id != current_task && currentTCB->task_id != current_task) {   //traverse until we find current task
         currentTCB = currentTCB->next;
     }
-    mvwprintw(win, outputLine++, 20, "Current Task #%d is trying to Yield.", current_task);
-    clock_t elapsed_time = clock() - get_start_time(current_task);
-    mvwprintw(win, outputLine++, 20, "Task: %d, Elapsed time: %d", current_task, elapsed_time);
-    mvwprintw(win, outputLine++, 20, "Current Quantum: %d",  current_quantum);
 
-    if (elapsed_time >= current_quantum) {
-        mvwprintw(win, outputLine++, 20, "Yielding....(Switching from task #%d to next ready task", current_task);
-        if (currentTCB->state == RUNNING)
-            currentTCB->state = READY;
-
-        current_task = (current_task + 1) % MAX_TASKS;
-        currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
-        while (currentTCB->state != READY && counter < MAX_TASKS -1 ) {
-            current_task = (current_task + 1) % MAX_TASKS;
-            currentTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
-            counter ++;
-        }
-
-        if (counter < MAX_TASKS - 1 && currentTCB->state == READY) {
-            currentTCB->start_time = clock();
-            currentTCB->state = RUNNING;
-            mvwprintw(win, outputLine++, 20, "Started Running Task #%d", current_task);
-        }
-        else {
-            mvwprintw(win, outputLine++, 20, "POSSIBLE DEAD LOCK");
-        }
+    if (currentTCB == nullptr) {
+        write_window(win, outputWriteLine++, 12, "Current task not found.");
+        return;
     }
-    else mvwprintw(win, outputLine++, 20, "NO Yield! (Task: %d still have some quantum left", current_task);
+    snprintf(tempStr, sizeof(tempStr), "Current Task #%d is trying to Yield", current_task);
+    write_window(win, outputWriteLine++, 12, tempStr);
+
+    clock_t elapsed_time = clock() - get_start_time(current_task);
+    snprintf(tempStr, sizeof(tempStr), "Task: %d. Elapsed time: %d.", current_task, elapsed_time);
+    write_window(win, outputWriteLine++, 12, tempStr);
+    snprintf(tempStr, sizeof(tempStr), "Current Quantum: %d", current_quantum);
+    write_window(win, outputWriteLine++, 12, tempStr);
+
+    if (elapsed_time < current_quantum) {
+        snprintf(tempStr, sizeof(tempStr), "NO Yield! (Task: %d still has some quantum left)", current_task);
+        write_window(win, outputWriteLine++, 12, tempStr);
+    }
+
+    snprintf(tempStr, sizeof(tempStr), "Yielding....(Switching from task #%d to next ready task", current_task);
+    write_window(win, outputWriteLine++, 12, tempStr);
+
+    tcb* nextTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
+
+    while (nextTCB != currentTCB && nextTCB->state != "READY") {
+
+        if (nextTCB->next == nullptr)
+            nextTCB = process_table;
+        else
+            nextTCB = nextTCB->next;
+        counter++;
+    }
+
+    if (nextTCB->state == "READY" && nextTCB != currentTCB) {
+        currentTCB->state = "READY";
+        current_task = nextTCB->task_id;
+        nextTCB->start_time = clock();
+        nextTCB->state = "RUNNING";
+        snprintf(tempStr, sizeof(tempStr), "Started Running Task #%d", current_task);
+        write_window(win, outputWriteLine++, 12, tempStr);
+    } else {
+        write_window(win, outputWriteLine++, 12, "No other READY task found.");
+    }
+    box(win, 0 , 0);
+    wrefresh(win);
 }
+
 //#########################################################
 int scheduler::create_task(string name, WINDOW* win) {
-    int maxLines = getmaxy(win) - 2;
-    scrollok(win, TRUE);
-    if (outputLine >= maxLines) {
-        scroll(win);
-        scroll(win);
-        scroll(win);
-        //box(win, 0, 0);
-        outputLine = maxLines-3;
-    }
-    mvwprintw(win, outputLine++, 20, "Creating task #%d...", next_available_task_id);
+    snprintf(tempStr, sizeof(tempStr), "Creating task #%d...", next_available_task_id);
+    write_window(win, outputWriteLine++, 12, tempStr);
+    box(win, 0 , 0);
     wrefresh(win);
     sleep(1);
     if (next_available_task_id == MAX_TASKS) {      //check if exeeding max tasks
-        mvwprintw(win, outputLine++, 20, "FAILED: Available tasks exeeded.");
-        wrefresh(win);
-        outputLine++;
+        write_window(win, outputWriteLine++,12,  "FAILED: Available tasks exeeded.");
         sleep(1);
         return (-1);                                //return -1 for error
     }
@@ -144,15 +149,16 @@ int scheduler::create_task(string name, WINDOW* win) {
     tcb* newTask = new tcb();                       //new task
     newTask->next = nullptr;
     newTask->taskName = name;                       //set name of task
-    newTask->state = "READY";                       //set state of task
+    newTask->state = READY;                       //set state of task
     newTask->start_time = clock();                  //set start time of task
     newTask->task_id = next_available_task_id++;    //inc next task id
 
     if (process_table == nullptr) {                 //if no tasks yet
         process_table = newTask;                    //process_table will point to this task
-        mvwprintw(win, outputLine++, 20, "Successfully created task #%d", newTask->task_id);
+        snprintf(tempStr, sizeof(tempStr), "Successfully created task #%d!", newTask->task_id);
+        write_window(win, outputWriteLine++, 12, tempStr);
+        box(win, 0 , 0);
         wrefresh(win);
-        outputLine++;
         sleep(1);
         return newTask->task_id;
     }
@@ -163,9 +169,10 @@ int scheduler::create_task(string name, WINDOW* win) {
     }
     ptrTCB->next = newTask;                      //add this new task to the end of process list
 
-    mvwprintw(win, outputLine++, 20, "Successfully created task #%d", newTask->task_id);
+    snprintf(tempStr, sizeof(tempStr), "Successfully created task #%d!", newTask->task_id);
+    write_window(win, outputWriteLine++,12, tempStr);
+    box(win, 0 , 0);
     wrefresh(win);
-    outputLine++;
     sleep(1);
     return newTask->task_id;                      //return the task id
 }
@@ -181,6 +188,7 @@ void scheduler::kill_task(int T_ID) {
         ptrTCB = ptrTCB->next;
     }
     ptrTCB->state = DEAD;
+    garbage_collect(T_ID);
 }
 //#########################################################
 void scheduler::garbage_collect(int T_ID) {
@@ -199,20 +207,23 @@ void scheduler::garbage_collect(int T_ID) {
     prevTCB->next = ptrTCB->next;
 }
 //#########################################################
+
 void scheduler::dump(WINDOW* win) {
-    int line = 3;
-    mvwprintw(win, line++, 20,  "Quantum = %ld", current_quantum);
-    line++;
-    mvwprintw(win, line++, 20,  "Task-ID\t Elapsed Time\tState");
-
+    int count = 6;
+    wclear(win);
+    write_window(win, 1, 15, "--- Scheduler Dump Win ---");
+    snprintf(tempStr, sizeof(tempStr), "Quantum = %d", current_quantum);
+    write_window(win, 4, 4, tempStr);
+    write_window(win, 5, 4,  "Task-ID  Task Name     Elapsed Time   State");
     tcb* ptrTCB = process_table;
-
+    write_window(win, count++, 4, "-------------------------------------------");
     while (ptrTCB != nullptr) {
-        mvwprintw(win, line++, 20, "   %d\t\t%d\t%s", ptrTCB->task_id, ptrTCB->start_time, ptrTCB->state.c_str());
+        snprintf(tempStr, sizeof(tempStr), "   %d     %s      ", ptrTCB->task_id, ptrTCB->taskName.c_str());
+        write_window(win, count, 4, tempStr);
+        snprintf(tempStr, sizeof(tempStr), "%d        %s", (clock() - ptrTCB->start_time), ptrTCB->state.c_str());
+        write_window(win, count++, 33, tempStr);
         ptrTCB = ptrTCB->next;
-        sleep(1);
     }
-    mvwprintw(win, line, 20, "----------------------------------------");
-    wrefresh(win);
-    sleep(5);
+    write_window(win, count, 4, "-------------------------------------------");
+    sleep(2);
 }

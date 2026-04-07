@@ -2,103 +2,116 @@
 #include <iostream>
 #include "Sema.h"
 #include <string>
-#include <ncurses.h>
 #include <pthread.h>
+#include "Ultima.h"
+
 
 using namespace std;
 
 semaphore::semaphore(int starting_value, string name, scheduler *theScheduler) {
-    pthread_mutex_init(&mutex, nullptr);
     sema_value = starting_value;
     resource_name = name;
     lucky_task = -1;
-
     sched_ptr = theScheduler;
 }
 
 semaphore::~semaphore() {
-    pthread_mutex_destroy(&mutex);
-    //sema_queue.Reset();
-    //pthread_mutex_destroy(&mutex);
+    //Destroy.
 }
 
-void semaphore::down(int taskID, WINDOW* win, WINDOW* schedWin)
-{
+void semaphore::down(int taskID, WINDOW* win, WINDOW* dumpWin) {
     pthread_mutex_lock(&mutex);
-
-    if (taskID == lucky_task) {
-        mvwprintw(win, outputLine++, 2, "Task #%d already has the resource! Ignore request.", lucky_task);
-        dump(1);
+    if (taskID == lucky_task) { //taskID already obtained resource.
+        snprintf(tempStr, sizeof(tempStr), "Task %d already has the resource! Ignore request.", lucky_task);
+        write_window(win, outputWriteLine++, 12, tempStr);
+        box(win, 0 , 0);
+        wrefresh(win);
+        dump(1, dumpWin);
     }
     else {
         if (sema_value >= 1) {
             sema_value--;
             lucky_task = taskID;
-            dump(1);
-
-            sched_ptr->yield(schedWin);
-            dump(1);
+            dump(1, dumpWin);
         }
         else {
             sema_queue.enqueue(taskID);
             sched_ptr->set_state(taskID, "BLOCKED");
-            mvwprintw(win, outputLine++, 2, "Block : %d and place into semaphore queue",  taskID);
-            dump(1);
-
-            sched_ptr->yield(schedWin);
-            dump(1);
+            snprintf(tempStr, sizeof(tempStr), "Block: %d and place into semaphore queue", taskID);
+            write_window(win, outputWriteLine++, 12, tempStr);
+            box(win, 0 , 0);
+            wrefresh(win);
+            dump(1, dumpWin);
+            while (taskID != lucky_task) {
+                pthread_cond_wait(&cond, &mutex);
+            }
         }
     }
     pthread_mutex_unlock(&mutex);
-    wrefresh(win);
 }
 
-void semaphore::up(WINDOW* win, WINDOW* schedWin)
+void semaphore::up(WINDOW* win, WINDOW* dumpWin)
 {
-    int task_id;
     pthread_mutex_lock(&mutex);
-    mvwprintw(win, outputLine++, 2, "TaskID : %d, LuckID : %d", sched_ptr->get_task_id(), lucky_task);
+    int task_id;
+    snprintf(tempStr, sizeof(tempStr), "TaskID: %d, LuckID: %d", sched_ptr->get_task_id(), lucky_task);
+    write_window(win, outputWriteLine++, 12, tempStr);
+    box(win, 0 , 0);
+    wrefresh(win);
 
     if(sched_ptr->get_task_id() == lucky_task)
     {
         if(sema_queue.isEmpty()) {
             sema_value++;
             lucky_task = -1;
-            dump(1);
+            dump(1, dumpWin);
         }
         else {
             task_id = sema_queue.dequeue();
             sched_ptr->set_state(task_id, READY);
-            mvwprintw (win, outputLine++, 3, "UnBlock  : %d and release from the queue", task_id);
+            snprintf(tempStr, sizeof(tempStr), "UnBlock: %d and release from the queue", task_id);
+            write_window(win, outputWriteLine++, 12, tempStr);
             lucky_task = task_id;
-            mvwprintw (win, outputLine++, 3, "Luck Task = %d", lucky_task);
-            dump(1);
-            sched_ptr->yield(schedWin);
-            dump(1);
+            snprintf(tempStr, sizeof(tempStr), "Luck Task = %d", lucky_task);
+            write_window(win, outputWriteLine++, 12, tempStr);
+            box(win, 0 , 0);
+            wrefresh(win);
+            dump(1, dumpWin);
+            pthread_cond_signal(&cond);
         }
     }
     pthread_mutex_unlock(&mutex);
-    wrefresh(win);
 }
 
 void semaphore::dump(int level, WINDOW* win)
-{/*
-    cout << "-----SEMAPHORE DUMP-------" << endl;
+{
+    wclear(win);
+    write_window(win, 1, 15, "--- Semaphore Dump Win ---");
     switch(level) {
         case 0:
-            cout << "Sema_Value: " << sema_value << endl;
-            cout << "Sema_Name : " << resource_name << endl;
-            cout << "Obtained by Task-ID: " << lucky_task<< endl;
+            snprintf(tempStr, sizeof(tempStr), "Sema_Value: %d", sema_value);
+            write_window(win, 3, 1, tempStr);
+            snprintf(tempStr, sizeof(tempStr), "Sema_Name: %s", resource_name.c_str());
+            write_window(win, 4, 1, tempStr);
+            snprintf(tempStr, sizeof(tempStr), "Obtained by Task-ID: %d", lucky_task);
+            write_window(win, 5, 1, tempStr);
             break;
         case 1:
-            cout << "Sema_Value         : " << sema_value << endl;
-            cout << "Sema_Name          : " << resource_name << endl;
-            cout << "Obtained by Task-ID: " << lucky_task << endl;
-            cout << "Sema-Queue: " << endl;
-            sema_queue.printQueue();
+            snprintf(tempStr, sizeof(tempStr), "Sema_Value: %d", sema_value);
+            write_window(win, 3, 1, tempStr);
+            snprintf(tempStr, sizeof(tempStr), "Sema_Name: %s", resource_name.c_str());
+            write_window(win, 4, 1, tempStr);
+            snprintf(tempStr, sizeof(tempStr), "Obtained by Task-ID: %d", lucky_task);
+            write_window(win, 5, 1, tempStr);
+            write_window(win, 6, 1, "Sema-Queue: ");
+            //sema_queue.printQueue();
             break;
         default:
-            cout << "ERROR in SEMAPHORE DUMP level";
+            write_window(win, 3, 1, "ERROR in SEMAPHORE DUMP level");
+
     }
-    cout << "---------------------------------------" << endl;*/
+    box(win, 0 , 0);
+    wrefresh(win);
+    //cout << "---------------------------------------" << endl;
+
 }

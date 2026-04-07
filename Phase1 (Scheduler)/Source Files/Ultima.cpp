@@ -1,6 +1,6 @@
-#include "Ultima.h"
 #include "scheduler.h"
 #include "Sema.h"
+#include "Ultima.h"
 #include <iostream>
 #include <unistd.h>
 #include <pthread.h>
@@ -11,161 +11,141 @@
 #include <fcntl.h>
 using namespace std;
 
-pthread_mutex_t ncurses_mutex = PTHREAD_MUTEX_INITIALIZER;
-void* thread1Fun(void* arg);//declare thread functions
+void* thread1Fun(void* arg);
 void* thread2Fun(void* arg);
-void* thread3Fun(void* arg);
-void* thread4Fun(void* arg);
-void* thread5Fun(void* arg);
+
+
+
 
 struct ThreadArgs {
-    WINDOW* win;
     semaphore* sem;
     int taskID;
 };
+scheduler sched;
+semaphore screenSema(1, "threadWin", &sched);
 
-WINDOW * semaDumpWin;
-WINDOW* outputWin;
 int main() {
-    pthread_t thread1ID, thread2ID, thread3ID, thread4ID, thread5ID;
-    scheduler sched;
-    semaphore screenSema(1, "threadWin", &sched);
-    //create windows for output
-    initscr();
-    WINDOW * outputWinOuter = newwin(50, 80, 3, 2);
-    outputWin = newwin(47, 78, 6, 3);
-    WINDOW * threadWin = newwin(10, 80, 3, 85);
-    WINDOW * schedDumpWin = newwin(15, 80, 13, 85);
-    semaDumpWin = newwin(25, 80, 28, 85);
-    //draw borders
-    box(outputWinOuter, 0, 0);
-    box(threadWin, 0, 0);
-    box(schedDumpWin, 0, 0);
-    box(semaDumpWin, 0, 0);
-    //window labels
-    mvwprintw(outputWinOuter, 2, 18, "ULTIMA 2.0 (Phase 1: Scheduler and Semaphore)");
-    mvwprintw(threadWin, 2, 25, "Window controlled by semaphore");
-    mvwprintw(threadWin, 3, 25, "------------------------------");
-    mvwprintw(schedDumpWin, 1, 20, "------------ PROCESS  TABLE ------------");
-    mvwprintw(semaDumpWin, 1, 1, "Semaphore Output Info");
-    //refresh windows
-    wrefresh(outputWin);
-    wrefresh(outputWinOuter);
-    wrefresh(threadWin);
-    wrefresh(schedDumpWin);
-    wrefresh(semaDumpWin);
-    sleep(1);
+    pthread_mutex_init(&winMutex, nullptr);//init mutex
+    initscr();//start ncurses
+    //------------------- CREATE WINDOWS -------------------
+    outputWin = create_window(51, 55, 1, 1);
+    threadWin = create_window(17, 55, 1, 57);
+    schedWin = create_window(17, 55, 1, 113);
+    semaWin = create_window(17, 55, 18, 113);
+    messWin = create_window(17, 55, 35, 113);
+
+    //------------------- LABEL WINDOWS -------------------
+    write_window(outputWin, 1,17, "--- Output Window ---");
+    write_window(schedWin, 1, 15, "--- Scheduler Dump Win ---");
+    write_window(semaWin, 1, 15, "--- Semaphore Dump Win ---");
+    write_window(messWin, 1, 16, "--- Message Dump Win ---");
+
+    pthread_t thread1ID, thread2ID;
+
     sched.start(outputWin);
 
     //create tasks
+    outputWriteLine++;
+    write_window(outputWin, outputWriteLine++,12, "First we will create 3 tasks:\n");
+    write_window(outputWin, outputWriteLine++,12, "-----------------------------\n");
     int task1 = sched.create_task("File Explorer", outputWin);
     int task2 = sched.create_task("Task Manager", outputWin);
     int task3 = sched.create_task("Chrome", outputWin);
-    int task4 = sched.create_task("Steam", outputWin);
-    int task5 = sched.create_task("Firefox", outputWin);
-    int task6 = sched.create_task("Virus", outputWin);
     //output process table
-    sched.dump(schedDumpWin);
-
+    sched.dump(schedWin);
+    //kill a task
+    outputWriteLine++;
+    write_window(outputWin, outputWriteLine++,12, "Now we will kill the 3rd task created");
+    write_window(outputWin, outputWriteLine++,12, "-------------------------------------");
+    sched.kill_task(task3);
+    //output process table after kill
+    sched.dump(schedWin);
     //create threads
-    ThreadArgs args1{threadWin, &screenSema, task1};
-    ThreadArgs args2{threadWin, &screenSema, task2};
-    ThreadArgs args3{threadWin, &screenSema, task3};
-    ThreadArgs args4{threadWin, &screenSema, task4};
-    ThreadArgs args5{threadWin, &screenSema, task5};
+    ThreadArgs args1{ &screenSema, task1};
+    ThreadArgs args2{ &screenSema, task2};
     int thread1 = pthread_create(&thread1ID, nullptr, thread1Fun, &args1);
     int thread2 = pthread_create(&thread2ID, nullptr, thread2Fun, &args2);
-    int thread3 = pthread_create(&thread3ID, nullptr, thread3Fun, &args3);
-    int thread4 = pthread_create(&thread4ID, nullptr, thread4Fun, &args4);
-    int thread5 = pthread_create(&thread5ID, nullptr, thread5Fun, &args5);
     pthread_join(thread1ID, nullptr);
     pthread_join(thread2ID, nullptr);
-    pthread_join(thread3ID, nullptr);
-    pthread_join(thread4ID, nullptr);
-    pthread_join(thread5ID, nullptr);
-
-    sleep(10000);
+    sleep(5);
     endwin();
+    return(0);
 }
 
 //functions for each thread
 void* thread1Fun(void* arg) {
+    //cout << "\n\n-----------------------Start of Thread 1-----------------------" << endl;
     //initialize variables and objects needed
     ThreadArgs* args = (ThreadArgs*)arg;
-    WINDOW* win = args->win;
     semaphore* sem = args->sem;
     int taskID = args->taskID;
 
-    sem->down(taskID, semaDumpWin, outputWin);
-    //call down to check semaphore
-    pthread_mutex_lock(&ncurses_mutex);
-    //output to window
-    mvwprintw(win, 4, 30, "Hello from thread 1");
-    wrefresh(win);
-    pthread_mutex_unlock(&ncurses_mutex);
+    sem->down(taskID, outputWin, semaWin);
+    sched.dump(schedWin);
+    sched.yield(outputWin);
+    write_window(threadWin, 4,8, "-----------------------");
+    write_window(threadWin, 5,8, "| Hello from thread 1 |");
+    write_window(threadWin, 6,8, "-----------------------");
+    sched.dump(schedWin);
+
+
+    sem->up(outputWin, semaWin);
+    //cout << "\n-----------------------End of Thread 1-----------------------\n\n" << endl;
     sleep(2);
-    sem->up(semaDumpWin, outputWin);
     return nullptr;
 }
-//functions for rest of threads are identical
 void* thread2Fun(void* arg) {
+    //cout << "\n\n-----------------------Start of Thread 2-----------------------" << endl;
+    //initialize variables and objects needed
     ThreadArgs* args = (ThreadArgs*)arg;
-    WINDOW* win = args->win;
     semaphore* sem = args->sem;
     int taskID = args->taskID;
 
-    sem->down(taskID, semaDumpWin, outputWin);
-    pthread_mutex_lock(&ncurses_mutex);
-    mvwprintw(win, 5, 30, "Hello from thread 2");
-    wrefresh(win);
-    pthread_mutex_unlock(&ncurses_mutex);
-    sleep(2);
-    sem->up(semaDumpWin, outputWin);
-    return nullptr;
-}
-void* thread3Fun(void* arg) {
-    ThreadArgs* args = (ThreadArgs*)arg;
-    WINDOW* win = args->win;
-    semaphore* sem = args->sem;
-    int taskID = args->taskID;
+    sem->down(taskID, outputWin, semaWin);
 
-    sem->down(taskID, semaDumpWin, outputWin);
-    pthread_mutex_lock(&ncurses_mutex);
-    mvwprintw(win, 6, 30, "Hello from thread 3");
-    wrefresh(win);
-    pthread_mutex_unlock(&ncurses_mutex);
+    sched.dump(schedWin);
+    sched.yield(outputWin);
+    write_window(threadWin, 4,8, "-----------------------");
+    write_window(threadWin, 5,8, "| Hello from thread 2 |");
+    write_window(threadWin, 6,8, "-----------------------");
+    sched.dump(schedWin);
+
+    sem->up(outputWin, semaWin);
+    //cout << "\n-----------------------End of Thread 2-----------------------\n\n" << endl;
     sleep(2);
-    sem->up(semaDumpWin, outputWin);
     return nullptr;
 }
 
-void* thread4Fun(void* arg) {
-    ThreadArgs* args = (ThreadArgs*)arg;
-    WINDOW* win = args->win;
-    semaphore* sem = args->sem;
-    int taskID = args->taskID;
 
-    sem->down(taskID, semaDumpWin, outputWin);
-    pthread_mutex_lock(&ncurses_mutex);
-    mvwprintw(win, 7, 30, "Hello from thread 4");
-    wrefresh(win);
-    pthread_mutex_unlock(&ncurses_mutex);
-    sleep(2);
-    sem->up(semaDumpWin, outputWin);
-    return nullptr;
+WINDOW *create_window(int height, int width, int starty, int startx) {
+    WINDOW *Win;
+    Win = newwin(height, width, starty, startx);
+    scrollok(Win, TRUE); // Allow scrolling of the window
+    scroll(Win); // scroll the window
+    box(Win, 0 , 0); // 0, 0 gives default characters
+    // for the vertical and horizontal lines
+    wrefresh(Win); // draw the window
+    return Win;
 }
-void* thread5Fun(void* arg) {
-    ThreadArgs* args = (ThreadArgs*)arg;
-    WINDOW* win = args->win;
-    semaphore* sem = args->sem;
-    int taskID = args->taskID;
+//----------------------------------------------------------------
+void write_window(WINDOW * Win, const char* text)
+{
+    wprintw(Win, text);
+    box(Win, 0 , 0);
+    wrefresh(Win); // draw the window
+}
+//----------------------------------------------------------------
+void write_window(WINDOW * Win, int y, int x, const char* text)
+{
+    pthread_mutex_lock(&winMutex);
+    mvwprintw(Win, y, x, text);
+    box(Win, 0 , 0);
+    wrefresh(Win); // draw the window
+    pthread_mutex_unlock(&winMutex);
+}
+//----------------------------------------------------------------
 
-    sem->down(taskID, semaDumpWin, outputWin);
-    pthread_mutex_lock(&ncurses_mutex);
-    mvwprintw(win, 8, 30, "Hello from thread 5");
-    wrefresh(win);
-    pthread_mutex_unlock(&ncurses_mutex);
-    sleep(2);
-    sem->up(semaDumpWin, outputWin);
-    return nullptr;
-}
+
+
+
+

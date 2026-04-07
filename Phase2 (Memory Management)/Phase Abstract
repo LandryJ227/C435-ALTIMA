@@ -1,1 +1,9 @@
-
+----------------------------------------------------------Phase #2: Message Passing--------------------------------------------------------------
+Phase #2 Abstract:
+  During this phase, we will be implementing the Inter-Process Communication (IPC) using message passing
+facilites. This allows tasks to communicated with each other through the use of send() and receive() calls.
+We were given two options: the IPC message passing or the u_pipe message passing. We opted for the IPC message passing
+because we felt that we understood this option more. 
+  Implementing the IPC class: each task will have a single mailbox (message queue), access to the mailbox will be mutually exclusive through
+the use of the semaphore, a Master Control Block (MCB) will be used so that the scheduler's objects and methods
+can be easily accessed.

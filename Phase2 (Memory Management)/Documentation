@@ -3,3 +3,8 @@
 
 First group meeting, we went over the Phase 2 Assignment sheet together and started our brainstorming 
 for how we are going to implement the Message Passing. We decided on using the Inter-Process Communication (IPC).
+We divided the work into sections for now: 
+  Julio: constructor, message_send, message_deleteall
+  Jacob: Message_rec, message_print, ipc_mess_dump
+  Ryan: Message_count, MCB
+--------------------------------------------------------------------------------------------------------------------------------------------------

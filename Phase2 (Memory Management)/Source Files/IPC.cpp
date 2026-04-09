@@ -5,20 +5,58 @@
 #include "IPC.h"
 
 
-IPC::IPC(int max_tasks, MCB* mainMCB) { // Julio
-    mcb = mainMCB;
-    if (max_tasks <= 0) {
-        // Handle error: max_tasks must be greater than 0
-    }
-   else {
+int IPC::ipc_init(int max_tasks, MCB* mainMCB) { // Julio
 
-   }
+    // Handle error: max_tasks must be greater than 0
+
+    if (max_tasks <= 0 || mainMCB == nullptr) {
+        std::cerr << "[IPC] ipc_init failed: Invalid arguments.\n";
+        ipc_status = -1;
+        return -1;
+
+    }
+
+    this->max_tasks = max_tasks;
+    this->mainMCB = mainMCB;
+
+    // Allocate memory for mailboxes
+    mailboxes = new (std::nothrow) std::queue<Message>[max_tasks];
+    if (!mailboxes) {
+        std::cerr << "[IPC] ipc_init failed: Memory allocation for mailboxes failed. \n";
+        ipc_status = -1;
+        return -1;
+
+    }
+
+    // Allocate memory for mailbox semaphores
+    mailbox_sem = new (std::nothrow) semaphore*[max_tasks];
+    if (!mailbox_sem) {
+        std::cerr << "[IPC] ipc_init failed: Memory allocation for mailbox semaphores failed.\n";
+        delete[] mailboxes; // Clean up previously allocated mailboxes
+        ipc_status = -1;
+        return -1;
+    }
+
+    // Construct semaphores for each mailbox
+    // TODO
+
+
+
+    std::cout << " [IPC] Initialized with " << max_tasks << " mailboxes.\n";
+    ipc_status = 1; // Success
+    return 1;
 };
 
 int IPC::Message_Send(Message *Message){ // Julio
+
+    // TODO
+
+
 }
 
 int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
+
+    // TODO
 
 }
 
@@ -28,6 +66,9 @@ int IPC::Message_Count() {// Ryan
 
 }
 int IPC::Message_DeleteAll(int Task_Id) { // Julio
+
+
+    // TODO
 
 }
 

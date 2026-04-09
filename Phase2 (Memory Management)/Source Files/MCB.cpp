@@ -3,3 +3,7 @@
 //
 
 #include "MCB.h"
+
+MCB() {
+
+}

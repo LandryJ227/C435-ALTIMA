@@ -1,11 +1,18 @@
 #ifndef ALTIMA_MCB_H
 #define ALTIMA_MCB_H
-#include "scheduler.h"
-#include "IPC.h"
+
+class scheduler;
+class IPC;
 
 class MCB {
-    scheduler sched;
-    IPC messenger;
+public:
+    scheduler* sched;
+    IPC* messenger;
+
+    MCB(scheduler* mainSched, IPC* mainIPC) {
+        sched = mainSched;
+        messenger = mainIPC;
+    }
 };
 
 #endif

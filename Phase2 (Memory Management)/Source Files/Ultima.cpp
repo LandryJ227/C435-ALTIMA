@@ -9,6 +9,8 @@
 #include <stdarg.h>
 #include <termios.h>
 #include <fcntl.h>
+#include "MCB.h"
+#include "IPC.cpp"
 using namespace std;
 
 void* thread1Fun(void* arg);
@@ -23,9 +25,13 @@ struct ThreadArgs {
 };
 scheduler sched;
 semaphore screenSema(1, "threadWin", &sched);
+IPC ipc;
 
 int main() {
     pthread_mutex_init(&winMutex, nullptr);//init mutex
+
+    MCB mcb = new mcb(sched, ipc);
+
     initscr();//start ncurses
     //------------------- CREATE WINDOWS -------------------
     outputWin = create_window(51, 55, 1, 1);
@@ -42,17 +48,18 @@ int main() {
 
     pthread_t thread1ID, thread2ID;
 
-    sched.start(outputWin);
+    mcb.sched.start(outputWin);
 
     //create tasks
     outputWriteLine++;
     write_window(outputWin, outputWriteLine++,12, "First we will create 3 tasks:\n");
     write_window(outputWin, outputWriteLine++,12, "-----------------------------\n");
-    int task1 = sched.create_task("File Explorer", outputWin);
-    int task2 = sched.create_task("Task Manager", outputWin);
-    int task3 = sched.create_task("Chrome", outputWin);
+    int task1 = mcb.sched.create_task("File Explorer", outputWin);
+    int task2 = mcb.sched.create_task("Task Manager", outputWin);
+    int task3 = mcb.sched.create_task("Chrome", outputWin);
     //output process table
-    sched.dump(schedWin);
+    mcb.sched.dump(schedWin);
+    sleep(100);
     //kill a task
     outputWriteLine++;
     write_window(outputWin, outputWriteLine++,12, "Now we will kill the 3rd task created");

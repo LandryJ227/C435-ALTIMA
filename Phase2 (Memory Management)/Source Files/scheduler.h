@@ -9,7 +9,6 @@
 #include <termios.h>
 #include <fcntl.h>
 #include "Queue.h"
-#include "IPC.cpp"
 
 using namespace std;
 
@@ -25,6 +24,7 @@ struct mailbox {
     Message messageQueue[32];
     Semaphore mailSema;
 };
+
 const string READY = "READY";
 const string RUNNING = "RUNNING";
 const string BLOCKED = "BLOCKED";

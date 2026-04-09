@@ -51,7 +51,7 @@ class ipc {
     void ipc_Message_Dump(); // Jacob
 
 };
-
+//###################################################################################################
 int Message_Receive(int Task_Id, Message *message) {
     tcb ptrTCB = mcb->sched.process_table;//start at head of process table
     while (ptrTCB.task_id != Task_Id && ptr.TCB.next != NULL) {//search for correct tcb with task id
@@ -65,6 +65,7 @@ int Message_Receive(int Task_Id, Message *message) {
     if (ptrTCB.taskMailbox.messageQueue.isEmpty()) return 0; //return 0 if no more messages
     else return 1;                                           //still messages left in mailbox
 }
+//###################################################################################################
 int Message_Receive(int Task_Id, char *Mess, int *Mess_Type) {
     tcb ptrTCB = mcb->sched.process_table;//start at head of process table
     while (ptrTCB.task_id != Task_Id && ptr.TCB.next != NULL) {//search for correct tcb with task id
@@ -80,6 +81,21 @@ int Message_Receive(int Task_Id, char *Mess, int *Mess_Type) {
     if (ptrTCB.taskMailbox.messageQueue.isEmpty()) return 0;             //return 0 if no more messages
     else return 1;                                                       //still messages left in mailbox
 }
+//###################################################################################################
+void Message_Print(int Task_id) {
+    tcb ptrTCB = mcb->sched.process_table;//start at head of process table
+    while (ptrTCB.task_id != Task_Id && ptr.TCB.next != NULL) {//search for correct tcb with task id
+        ptrTCB = ptrTCB.next;
+    }
+    if (ptrTCB.task_id != Task_Id) return -1;
+
+    //print all messages from queue
+}
+//###################################################################################################
+void ipc_Message_Dump() {
+
+}
+//###################################################################################################
 void connectMCB(MCB* mainMCB) {
     mcb = mainMCB;
 }

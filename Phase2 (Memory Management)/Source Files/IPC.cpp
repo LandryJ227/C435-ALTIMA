@@ -49,7 +49,7 @@ int IPC::ipc_init(int max_tasks, MCB* mainMCB) { // Julio
 int IPC::Message_Send(Message *Message, WINDOW * win, WINDOW* dumpWin){ // Julio
 
 // #################    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ###########################
-    }
+    
     if (!Message) {
         cerr << "[IPC] Message_Send: null message pointer.\n";
         return -1;

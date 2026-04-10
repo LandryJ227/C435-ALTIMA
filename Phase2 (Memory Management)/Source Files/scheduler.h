@@ -18,6 +18,7 @@ class message_queue;
 struct mailbox {
     message_queue* messageQueue;
     semaphore* mailSema;
+    mailbox() : messageQueue(nullptr), mailSema(nullptr) {}
 };
 
 struct tcb {

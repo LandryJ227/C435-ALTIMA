@@ -34,6 +34,7 @@ int main() {
     pthread_mutex_init(&winMutex, nullptr);//init mutex
 
     MCB mcb(&sched, &ipc);
+    ipc.setMCB(&mcb);
 
     initscr();//start ncurses
     //------------------- CREATE WINDOWS -------------------
@@ -70,8 +71,8 @@ int main() {
     //output process table after kill
     sched.dump(schedWin);
     //create threads
-    ThreadArgs args1{ &screenSema, task1};
-    ThreadArgs args2{ &screenSema, task2};
+    ThreadArgs args1{ &screenSema, task1, &mcb};
+    ThreadArgs args2{ &screenSema, task2, &mcb};
     int thread1 = pthread_create(&thread1ID, nullptr, thread1Fun, &args1);
     int thread2 = pthread_create(&thread2ID, nullptr, thread2Fun, &args2);
     pthread_join(thread1ID, nullptr);
@@ -97,10 +98,9 @@ void* thread1Fun(void* arg) {
     write_window(threadWin, 5,8, "| Hello from thread 1 |");
     write_window(threadWin, 6,8, "-----------------------");
 
-    string messTemp = "Hello Thread 2!";
+    string messTemp = "Yo wsg its thread 1 here";
     Message sendingMessage(0, 1, 0, (char*)messTemp.c_str());
-    //mcb->ipc->Message_Send(&sendingMessage);
-
+    mcb->ipc->Message_Send(&sendingMessage, outputWin, semaWin);
     sched.dump(schedWin);
     sem->up(outputWin, semaWin);
     //cout << "\n-----------------------End of Thread 1-----------------------\n\n" << endl;
@@ -125,6 +125,7 @@ void* thread2Fun(void* arg) {
 
     Message receivingMessage;
     mcb->ipc->Message_Receive(1, &receivingMessage, semaWin);
+    write_window(threadWin, 6,8, receivingMessage.Msg_Text);
 
     sched.dump(schedWin);
     sem->up(outputWin, semaWin);

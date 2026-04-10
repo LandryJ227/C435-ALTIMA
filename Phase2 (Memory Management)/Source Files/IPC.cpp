@@ -46,33 +46,48 @@ int IPC::ipc_init(int max_tasks, MCB* mainMCB) { // Julio
     return 1;
 };
 */
-int IPC::Message_Send(Message *message){ // Julio
-
+int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
+    write_window(win, 25,1, "A");
 // #################    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ###########################
-    if (ipc_status == -1) {
-        //cerr << "[IPC] Message_Send: IPC not initialized.\n";
-        return -1;
-    }
-    if (!message) {
-        //cerr << "[IPC] Message_Send: null message pointer.\n";
-        return -1;
-    }
-    if (!valid_task_id(message->Source_Task_Id)) {
-        //cerr << "[IPC] Message_Send: invalid source task id "
-        //     << message->Source_Task_Id << ".\n";
-        return -1;
-    }
-    if (!valid_task_id(message->Destination_Task_Id)) {
-        //cerr << "[IPC] Message_Send: invalid destination task id "
-        //     << message->Destination_Task_Id << ".\n";
-        return -1;
-    }
-    if (message->Msg_Size < 0 || message->Msg_Size > 32) {
-        //cerr << "[IPC] Message_Send: Msg_Size out of range (0-32).\n";
-        //return -1;
-    }
-//#################################################################################################
 
+    if (!message) {
+        cerr << "[IPC] Message_Send: null message pointer.\n";
+        return -1;
+    }
+    // Find destination task from TCB
+    tcb* destTCB = mcb->sched->process_table;
+    while(destTCB != nullptr && destTCB->task_id != message->Destination_Task_Id) {
+        destTCB = destTCB->next;
+    }
+
+    if (destTCB == nullptr) {
+        snprintf(tempStr, sizeof(tempStr), "[IPC] Message_Send: Destination task id %d not found.\n", message->Destination_Task_Id);
+        return -1;
+    }
+
+    // Find source task from TCB
+    tcb* sourceTCB = mcb->sched->process_table;
+    while (sourceTCB != nullptr && sourceTCB->task_id != message->Source_Task_Id) {
+        sourceTCB = sourceTCB->next;
+    }
+
+    if (sourceTCB == nullptr) {
+        snprintf(tempStr, sizeof(tempStr), "[IPC] Message_Send: Source task id %d not found.\n", message->Source_Task_Id);
+        return -1;
+    }
+
+    // Check message size
+    if (message->Msg_Size < 0 || message->Msg_Size > 31) {
+        snprintf(tempStr, sizeof(tempStr), "[IPC] Message_Send: Invalid message size %d. Must be between 0 and 31.\n", message->Msg_Size);
+        return -1;
+    }
+
+    // Check if destination mailbox is full
+    if (destTCB->taskMailbox.messageQueue->size >= message_queue::QUEUE_SIZE) {
+        snprintf(tempStr, sizeof(tempStr), "[IPC] Message_Send: Destination mailbox for task %d is full.\n", message->Destination_Task_Id);
+        return -1;
+    }
+//####################### BUILD CLEAN COPY OF MESSAGE ############################################
     Message msg_copy; // Create a copy of the message to enqueue
 
     msg_copy.Source_Task_Id = message->Source_Task_Id;
@@ -80,19 +95,21 @@ int IPC::Message_Send(Message *message){ // Julio
     msg_copy.Message_Arrival_Time = time(nullptr); // Set arrival time to current time
     msg_copy.Msg_Type = message->Msg_Type;
     msg_copy.Msg_Size = message->Msg_Size;
+    msg_copy.Msg_Text = new char[32];
     strncpy(msg_copy.Msg_Text, message->Msg_Text, 31);
-    msg_copy.Msg_Text[31] = '\0'; // Ensure null-termination)
+    msg_copy.Msg_Text[31] = '\0';
 
-    int destination_id = message->Destination_Task_Id;
-    mailbox[destination_id].enqueue(msg_copy); // Enqueue the message to the destination's mailbox
+    destTCB->taskMailbox.mailSema->down(message->Source_Task_Id, win, dumpWin);
+    destTCB->taskMailbox.messageQueue->enqueue(msg_copy);
+    destTCB->taskMailbox.mailSema->up(win, dumpWin);
 
 
-    cout << "[IPC] Message sent: Task " << msg_copy.Source_Task_Id
-         << " -> Task "  << dest
-         << " | Type: "  << msg_copy.Msg_Type.Message_Type_Id
-         << " | Size: "  << msg_copy.Msg_Size
-         << " | Text: \"" << msg_copy.Msg_Text << "\"\n";
-
+    snprintf(tempStr, sizeof(tempStr),
+             "[IPC] Sent: Task %d -> Task %d | Type: %d | \"%s\"",
+             msg_copy.Source_Task_Id,
+             msg_copy.Destination_Task_Id,
+             msg_copy.Msg_Type.Message_Type_Id,
+             msg_copy.Msg_Text);
 
     return 1;
 }
@@ -182,3 +199,7 @@ void IPC::ipc_Message_Dump(WINDOW* win) {
 //IPC::~IPC() {
 
 //}
+
+void IPC::setMCB(MCB* mainMCB) {
+    mcb = mainMCB;
+}

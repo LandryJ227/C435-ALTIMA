@@ -24,6 +24,8 @@ public:
 
     */
 
+    void setMCB(MCB* mainMCB);
+
     int ipc_init(int max_tasks, MCB* mainMCB);
 
     int Message_Send(Message *Message, WINDOW * win, WINDOW* dumpWin);   // Julio
@@ -55,7 +57,7 @@ private:
     //semaphore** mailbox_sem;
     //message_queue* mailbox;
     //semaphore** mailbox_sem;
-    MCB* mainMCB;
+    //MCB* mainMCB;
 
 
     bool valid_task_id(int id) const { 

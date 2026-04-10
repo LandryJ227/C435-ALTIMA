@@ -13,7 +13,11 @@ class message_queue {
         int head=0;
         int tail=0;
 
-
+        message_queue() {
+            size=0;
+            head=0;
+            tail=0;
+        }
         //Function to add an element to the back of the queue
         void enqueue(Message T);
         //Function to remove and return the integer valoue at the front of the queue.

@@ -41,9 +41,9 @@
         Message() : Source_Task_Id(-1),         // no task yet
                     Destination_Task_Id(-1),    // unset, no task
                     Message_Arrival_Time(0),    // no time yet
-                    Msg_Size(0){                // empty message
-                    memset(Msg_Text, 0, sizeof(Msg_Text));
-                }
+                    Msg_Size(0),                 // empty message
+                    Msg_Text(nullptr) {}
+
 
         Message(int source, int destination, int type, char* text) {
             Source_Task_Id = source;

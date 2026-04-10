@@ -49,6 +49,7 @@ int IPC::ipc_init(int max_tasks, MCB* mainMCB) { // Julio
 
 int IPC::Message_Send(Message *Message){ // Julio
 
+// #################    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ###########################
     if (ipc_status == -1) {
         cerr << "[IPC] Message_Send: IPC not initialized.\n";
         return -1;
@@ -71,8 +72,10 @@ int IPC::Message_Send(Message *Message){ // Julio
         cerr << "[IPC] Message_Send: Msg_Size out of range (0-32).\n";
         return -1;
     }
+//#################################################################################################
 
     Message msg_copy; // Create a copy of the message to enqueue
+    
     msg_copy.Source_Task_Id = message->Source_Task_Id;
     msg_copy.Destination_Task_Id = message->Destination_Task_Id;
     msg_copy.Message_Arrival_Time = time(nullptr); // Set arrival time to current time

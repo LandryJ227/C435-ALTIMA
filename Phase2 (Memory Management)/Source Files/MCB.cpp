@@ -1,9 +1,10 @@
-//
-// Created by jacob on 4/7/2026.
-//
-
+#pragma once
 #include "MCB.h"
+#include "scheduler.h"
+#include "IPC.h"
 
-MCB() {
 
+MCB::MCB(scheduler* mainSched, IPC* mainIPC) {
+    sched = mainSched;
+    messenger = mainIPC;
 }

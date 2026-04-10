@@ -45,4 +45,11 @@
                     memset(Msg_Text, 0, sizeof(Msg_Text));
                 }
 
+        Message(int source, int destination, int type, char* text) {
+            Source_Task_Id = source;
+            Destination_Task_Id = destination;
+            Msg_Type.Message_Type_Id = type;
+            Msg_Text = text;
+        }
+
     };

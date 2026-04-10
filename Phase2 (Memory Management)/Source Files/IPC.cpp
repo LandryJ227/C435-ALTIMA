@@ -46,30 +46,30 @@ int IPC::ipc_init(int max_tasks, MCB* mainMCB) { // Julio
     return 1;
 };
 */
-int IPC::Message_Send(Message *Message){ // Julio
+int IPC::Message_Send(Message *message){ // Julio
 
 // #################    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ###########################
     if (ipc_status == -1) {
-        cerr << "[IPC] Message_Send: IPC not initialized.\n";
+        //cerr << "[IPC] Message_Send: IPC not initialized.\n";
         return -1;
     }
     if (!message) {
-        cerr << "[IPC] Message_Send: null message pointer.\n";
+        //cerr << "[IPC] Message_Send: null message pointer.\n";
         return -1;
     }
     if (!valid_task_id(message->Source_Task_Id)) {
-        cerr << "[IPC] Message_Send: invalid source task id "
-             << message->Source_Task_Id << ".\n";
+        //cerr << "[IPC] Message_Send: invalid source task id "
+        //     << message->Source_Task_Id << ".\n";
         return -1;
     }
     if (!valid_task_id(message->Destination_Task_Id)) {
-        cerr << "[IPC] Message_Send: invalid destination task id "
-             << message->Destination_Task_Id << ".\n";
+        //cerr << "[IPC] Message_Send: invalid destination task id "
+        //     << message->Destination_Task_Id << ".\n";
         return -1;
     }
     if (message->Msg_Size < 0 || message->Msg_Size > 32) {
-        cerr << "[IPC] Message_Send: Msg_Size out of range (0-32).\n";
-        return -1;
+        //cerr << "[IPC] Message_Send: Msg_Size out of range (0-32).\n";
+        //return -1;
     }
 //#################################################################################################
 
@@ -96,7 +96,7 @@ int IPC::Message_Send(Message *Message){ // Julio
 
     return 1;
 }
-
+/*
 int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
 
     // TODO
@@ -116,8 +116,7 @@ int IPC::Message_DeleteAll(int Task_Id) { // Julio
 
     // TODO
 
-}
-
+} */
 //###################################################################################################
 int IPC::Message_Receive(int Task_Id, Message *message, WINDOW* semaWin) {
     tcb* ptrTCB = mcb->sched->process_table;//start at head of process table
@@ -180,6 +179,6 @@ void IPC::ipc_Message_Dump(WINDOW* win) {
 }
 //###################################################################################################
 
-IPC::~IPC() {
+//IPC::~IPC() {
 
-}
+//}

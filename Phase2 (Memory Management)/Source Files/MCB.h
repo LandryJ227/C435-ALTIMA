@@ -7,7 +7,7 @@ class IPC;
 class MCB {
 public:
     scheduler* sched;
-    IPC* messenger;
+    IPC* ipc;
     //Add any other important semaphores or structures you want to access between structures
 
     MCB(scheduler* mainSched, IPC* mainIPC);

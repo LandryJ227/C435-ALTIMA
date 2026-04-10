@@ -11,6 +11,8 @@
 #include <fcntl.h>
 #include "MCB.h"
 #include "IPC.h"
+#include "message.h"
+
 using namespace std;
 
 void* thread1Fun(void* arg);
@@ -22,6 +24,7 @@ void* thread2Fun(void* arg);
 struct ThreadArgs {
     semaphore* sem;
     int taskID;
+    MCB* mcb;
 };
 scheduler sched;
 semaphore screenSema(1, "threadWin", &sched);
@@ -85,6 +88,7 @@ void* thread1Fun(void* arg) {
     ThreadArgs* args = (ThreadArgs*)arg;
     semaphore* sem = args->sem;
     int taskID = args->taskID;
+    MCB* mcb = args->mcb;
 
     sem->down(taskID, outputWin, semaWin);
     sched.dump(schedWin);
@@ -92,9 +96,12 @@ void* thread1Fun(void* arg) {
     write_window(threadWin, 4,8, "-----------------------");
     write_window(threadWin, 5,8, "| Hello from thread 1 |");
     write_window(threadWin, 6,8, "-----------------------");
+
+    string messTemp = "Hello Thread 2!";
+    Message sendingMessage(0, 1, 0, (char*)messTemp.c_str());
+    //mcb->ipc->Message_Send(&sendingMessage);
+
     sched.dump(schedWin);
-
-
     sem->up(outputWin, semaWin);
     //cout << "\n-----------------------End of Thread 1-----------------------\n\n" << endl;
     sleep(2);
@@ -106,6 +113,7 @@ void* thread2Fun(void* arg) {
     ThreadArgs* args = (ThreadArgs*)arg;
     semaphore* sem = args->sem;
     int taskID = args->taskID;
+    MCB* mcb = args->mcb;
 
     sem->down(taskID, outputWin, semaWin);
 
@@ -114,8 +122,11 @@ void* thread2Fun(void* arg) {
     write_window(threadWin, 4,8, "-----------------------");
     write_window(threadWin, 5,8, "| Hello from thread 2 |");
     write_window(threadWin, 6,8, "-----------------------");
-    sched.dump(schedWin);
 
+    Message receivingMessage;
+    mcb->ipc->Message_Receive(1, &receivingMessage, semaWin);
+
+    sched.dump(schedWin);
     sem->up(outputWin, semaWin);
     //cout << "\n-----------------------End of Thread 2-----------------------\n\n" << endl;
     sleep(2);

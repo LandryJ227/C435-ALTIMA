@@ -152,6 +152,8 @@ int scheduler::create_task(string name, WINDOW* win) {
     newTask->state = READY;                       //set state of task
     newTask->start_time = clock();                  //set start time of task
     newTask->task_id = next_available_task_id++;    //inc next task id
+    newTask->taskMailbox.mailSema = new semaphore(1, "mailbox", this);
+    newTask->taskMailbox.messageQueue = new message_queue();
 
     if (process_table == nullptr) {                 //if no tasks yet
         process_table = newTask;                    //process_table will point to this task

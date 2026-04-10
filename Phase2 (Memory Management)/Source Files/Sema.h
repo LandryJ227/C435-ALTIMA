@@ -1,6 +1,5 @@
 #pragma once
 #include "Queue.h"
-#include "scheduler.h"
 #include <pthread.h>
 using namespace std;
 

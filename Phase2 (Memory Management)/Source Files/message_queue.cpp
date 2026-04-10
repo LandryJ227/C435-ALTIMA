@@ -34,6 +34,4 @@ bool message_queue::isEmpty() {
     else return false;
 }
 
-//Formatted display of the content within the queue.
-//todo!
-//void message_queue::printQueue();
+

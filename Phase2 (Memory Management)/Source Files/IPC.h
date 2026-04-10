@@ -4,10 +4,11 @@
 #include <time.h>
 #include "MCB.h"
 #include "scheduler.h"
-
+#include <cstring>
 
 class IPC {
     MCB* mcb = nullptr;
+    WINDOW* IPCwin;
 
 public:
 /*  --------------------------------------------------------
@@ -61,33 +62,35 @@ public:
 
     };
 
+
+
     int ipc_init(int max_tasks, MCB* mainMCB);
 
     int Message_Send(Message *Message);   // Julio
 
     int Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type); // Julio
 
-    int Message_Receive(int Task_Id, Message *Message); // Jacob
+    int Message_Receive(int Task_Id, Message *message, WINDOW* semaWin); // Jacob
 
-    int Message_Receive(int Task_Id, char *Mess, int *Mess_Type); // Jacob
+    int Message_Receive(int Task_Id, char *Mess, int *Mess_Type, WINDOW* semaWin); // Jacob
 
     int Message_Count(int Task_Id); // Ryan
 
     int Message_Count(); // Ryan
 
-    void Message_Print(int Task_Id); // Jacob
+    void Message_Print(int Task_Id, WINDOW* win); // Jacob
 
     int Message_DeleteAll(int Task_Id); // Julio
 
-    void ipc_Message_Dump();
+    void ipc_Message_Dump(WINDOW* win);
 
-    ~IPC();
+   // ~IPC();
 
 private:
     int max_tasks;
     int ipc_status;
-    std::queue<Message>* mailbox;
-    semaphore** mailbox_sem;
+    //std::queue<Message>* mailbox;
+    //semaphore** mailbox_sem;
     MCB* mainMCB;
 
 

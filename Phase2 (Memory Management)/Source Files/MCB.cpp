@@ -4,6 +4,7 @@
 
 #include "MCB.h"
 
-MCB() {
-
+MCB::MCB(scheduler* mainSched, IPC* mainIPC) {
+    sched = mainSched;
+    messenger = mainIPC;
 }

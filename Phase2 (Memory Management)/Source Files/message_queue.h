@@ -1,3 +1,4 @@
+#pragma once
 #ifndef C435_ALTIMA_MESSAGE_QUEUE_H
 #define C435_ALTIMA_MESSAGE_QUEUE_H
 #include "IPC.h"
@@ -11,6 +12,7 @@ class message_queue {
         int head=0;
         int tail=0;
 
+
         //Function to add an element to the back of the queue
         void enqueue(IPC::Message T);
         //Function to remove and return the integer valoue at the front of the queue.
@@ -19,7 +21,6 @@ class message_queue {
         bool isEmpty();
         //Formatted display of the content within the queue.
         //todo!
-        //void printQueue();
 };
 
 #endif //C435_ALTIMA_MESSAGE_QUEUE_H

@@ -10,7 +10,7 @@
 #include <termios.h>
 #include <fcntl.h>
 #include "MCB.h"
-#include "IPC.cpp"
+#include "IPC.h"
 using namespace std;
 
 void* thread1Fun(void* arg);
@@ -30,7 +30,7 @@ IPC ipc;
 int main() {
     pthread_mutex_init(&winMutex, nullptr);//init mutex
 
-    MCB mcb = new mcb(sched, ipc);
+    MCB mcb(&sched, &ipc);
 
     initscr();//start ncurses
     //------------------- CREATE WINDOWS -------------------
@@ -48,18 +48,17 @@ int main() {
 
     pthread_t thread1ID, thread2ID;
 
-    mcb.sched.start(outputWin);
+    sched.start(outputWin);
 
     //create tasks
     outputWriteLine++;
     write_window(outputWin, outputWriteLine++,12, "First we will create 3 tasks:\n");
     write_window(outputWin, outputWriteLine++,12, "-----------------------------\n");
-    int task1 = mcb.sched.create_task("File Explorer", outputWin);
-    int task2 = mcb.sched.create_task("Task Manager", outputWin);
-    int task3 = mcb.sched.create_task("Chrome", outputWin);
+    int task1 = sched.create_task("File Explorer", outputWin);
+    int task2 = sched.create_task("Task Manager", outputWin);
+    int task3 = sched.create_task("Chrome", outputWin);
     //output process table
-    mcb.sched.dump(schedWin);
-    sleep(100);
+    sched.dump(schedWin);
     //kill a task
     outputWriteLine++;
     write_window(outputWin, outputWriteLine++,12, "Now we will kill the 3rd task created");

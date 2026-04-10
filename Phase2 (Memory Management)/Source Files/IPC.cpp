@@ -53,21 +53,21 @@ int IPC::Message_Send(Message *Message){ // Julio
         cerr << "[IPC] Message_Send: IPC not initialized.\n";
         return -1;
     }
-    if (!message) {
+    if (!Message) {
         cerr << "[IPC] Message_Send: null message pointer.\n";
         return -1;
     }
-    if (!valid_task_id(message->Source_Task_Id)) {
+    if (!valid_task_id(Message->Source_Task_Id)) {
         cerr << "[IPC] Message_Send: invalid source task id "
-             << message->Source_Task_Id << ".\n";
+             << Message->Source_Task_Id << ".\n";
         return -1;
     }
-    if (!valid_task_id(message->Destination_Task_Id)) {
+    if (!valid_task_id(Message->Destination_Task_Id)) {
         cerr << "[IPC] Message_Send: invalid destination task id "
-             << message->Destination_Task_Id << ".\n";
+             << Message->Destination_Task_Id << ".\n";
         return -1;
     }
-    if (message->Msg_Size < 0 || message->Msg_Size > 32) {
+    if (Message->Msg_Size < 0 || Message->Msg_Size > 32) {
         cerr << "[IPC] Message_Send: Msg_Size out of range (0-32).\n";
         return -1;
     }
@@ -75,15 +75,15 @@ int IPC::Message_Send(Message *Message){ // Julio
 
     Message msg_copy; // Create a copy of the message to enqueue
 
-    msg_copy.Source_Task_Id = message->Source_Task_Id;
-    msg_copy.Destination_Task_Id = message->Destination_Task_Id;
+    msg_copy.Source_Task_Id = Message->Source_Task_Id;
+    msg_copy.Destination_Task_Id = Message->Destination_Task_Id;
     msg_copy.Message_Arrival_Time = time(nullptr); // Set arrival time to current time
-    msg_copy.Msg_Type = message->Msg_Type;
-    msg_copy.Msg_Size = message->Msg_Size;
-    strncpy(msg_copy.Msg_Text, message->Msg_Text, 31);
+    msg_copy.Msg_Type = Message->Msg_Type;
+    msg_copy.Msg_Size = Message->Msg_Size;
+    strncpy(msg_copy.Msg_Text, Message->Msg_Text, 31);
     msg_copy.Msg_Text[31] = '\0'; // Ensure null-termination)
 
-    int destination_id = message->Destination_Task_Id;
+    int destination_id = Message->Destination_Task_Id;
     mailbox[destination_id].enqueue(msg_copy); // Enqueue the message to the destination's mailbox
 
 

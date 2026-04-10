@@ -10,9 +10,35 @@ class IPC {
     MCB* mcb = nullptr;
 
 public:
+/*  --------------------------------------------------------
+    Message_Type
+      0 = Text        — Text message, no action required
+      1 = Service     — task requests a service; send result back
+      2 = Notification — service completed; no action required
+    --------------------------------------------------------
+*/
     struct Message_Type {
         int Message_Type_Id;
         char Message_Type_Description[64];
+
+
+        // Default constructor (Message_Type mt;)
+        //     -Initializes the Message_Type_Id to 0 and Message_Type_Description to an empty string
+
+        Message_Type() : Message_Type_Id(0) {
+            memset(Message_Type_Description, 0, sizeof(Message_Type_Description));
+
+        }
+
+
+        // Parameterized constructor (Message_Type mt(1, "Service");)
+        //      -Initializes the Message_Type_Id with provided id
+
+        Message_Type(int id, const char* desc) : Message_Type_Id(id) {
+            strncpy(Message_Type_Description, desc, 63);
+            Message_Type_Description[63] = '\0';    // Ensure null-termination
+
+        }
 
     };
 
@@ -24,9 +50,18 @@ public:
         int Msg_Size;
         char *Msg_Text;
 
+        // Default constructor (Message msg;)
+        //     -Initializes all members to their default values
+        Message() : Source_Task_Id(-1),         // no task yet
+                    Destination_Task_Id(-1),    // unset, no task
+                    Message_Arrival_Time(0),    // no time yet
+                    Msg_Size(0){                // empty message
+                    memset(Msg_Text, 0, sizeof(Msg_Text));
+                }
+
     };
 
-    IPC(int max_tasks, MCB* mainMCB);
+    int ipc_init(int max_tasks, MCB* mainMCB);
 
     int Message_Send(Message *Message);   // Julio
 
@@ -45,6 +80,20 @@ public:
     int Message_DeleteAll(int Task_Id); // Julio
 
     void ipc_Message_Dump();
+
+    ~IPC();
+
+private:
+    int max_tasks;
+    int ipc_status;
+    std::queue<Message>* mailbox;
+    semaphore** mailbox_sem;
+    MCB* mainMCB;
+
+
+    bool valid_task_id(int id) const { 
+        return id >= 0 && id < max_tasks;
+    }
 
 };
 #endif //C435_ALTIMA_IPC_H

@@ -3,57 +3,32 @@
 #include "scheduler.h"
 #include "IPC.h"
 #include "Ultima.h"
-/*
+
 int IPC::ipc_init(int max_tasks, MCB* mainMCB) { // Julio
 
     // Handle error: max_tasks must be greater than 0
-
-    if (max_tasks <= 0 || mainMCB == nullptr) {
-        std::cerr << "[IPC] ipc_init failed: Invalid arguments.\n";
-        ipc_status = -1;
-        return -1;
-
-    }
+    if (max_tasks <= 0 || mainMCB == nullptr){
+        ipc_status = -1; // Set error status
+        return -1; 
+        }
 
     this->max_tasks = max_tasks;
-    this->mainMCB = mainMCB;
+    this->mcb = mainMCB;
 
-    // Allocate memory for mailboxes
-    mailboxes = new (std::nothrow) std::queue<Message>[max_tasks];
-    if (!mailboxes) {
-        std::cerr << "[IPC] ipc_init failed: Memory allocation for mailboxes failed. \n";
-        ipc_status = -1;
-        return -1;
-
-    }
-
-    // Allocate memory for mailbox semaphores
-    mailbox_sem = new (std::nothrow) semaphore*[max_tasks];
-    if (!mailbox_sem) {
-        std::cerr << "[IPC] ipc_init failed: Memory allocation for mailbox semaphores failed.\n";
-        delete[] mailboxes; // Clean up previously allocated mailboxes
-        ipc_status = -1;
-        return -1;
-    }
-
-    // Construct semaphores for each mailbox
-    // TODO
-
-
-
-    std::cout << " [IPC] Initialized with " << max_tasks << " mailboxes.\n";
-    ipc_status = 1; // Success
+    ipc_status = 1; // Set success status
     return 1;
-};
-*/
+
+//###########################################################################################################
+
 int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
     write_window(win, 25,1, "A");
-// #################    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ###########################
+// ========================    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ==============================
 
     if (!message) {
         cerr << "[IPC] Message_Send: null message pointer.\n";
         return -1;
     }
+
     // Find destination task from TCB
     tcb* destTCB = mcb->sched->process_table;
     while(destTCB != nullptr && destTCB->task_id != message->Destination_Task_Id) {
@@ -87,21 +62,23 @@ int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
         snprintf(tempStr, sizeof(tempStr), "[IPC] Message_Send: Destination mailbox for task %d is full.\n", message->Destination_Task_Id);
         return -1;
     }
-//####################### BUILD CLEAN COPY OF MESSAGE ############################################
+//===================================== END ERROR CHECKING ================================================================
+
+//================================= BUILD CLEAN COPY OF MESSAGE ===========================================================
     Message msg_copy; // Create a copy of the message to enqueue
 
-    msg_copy.Source_Task_Id = message->Source_Task_Id;
-    msg_copy.Destination_Task_Id = message->Destination_Task_Id;
-    msg_copy.Message_Arrival_Time = time(nullptr); // Set arrival time to current time
-    msg_copy.Msg_Type = message->Msg_Type;
-    msg_copy.Msg_Size = message->Msg_Size;
-    msg_copy.Msg_Text = new char[32];
-    strncpy(msg_copy.Msg_Text, message->Msg_Text, 31);
-    msg_copy.Msg_Text[31] = '\0';
+    msg_copy.Source_Task_Id = message->Source_Task_Id;              // copy source task id
+    msg_copy.Destination_Task_Id = message->Destination_Task_Id;    // copy destination task id
+    msg_copy.Message_Arrival_Time = time(nullptr);                  // set arrival time to current time
+    msg_copy.Msg_Type = message->Msg_Type;                          // copy message type
+    msg_copy.Msg_Size = message->Msg_Size;                          // copy message size
+    msg_copy.Msg_Text = new char[32];                               // allocate memory for message text (max 31 chars + null terminator)
+    strncpy(msg_copy.Msg_Text, message->Msg_Text, 31);              // copy message text with size limit
+    msg_copy.Msg_Text[31] = '\0';                                   // ensure null termination  
 
-    destTCB->taskMailbox.mailSema->down(message->Source_Task_Id, win, dumpWin);
-    destTCB->taskMailbox.messageQueue->enqueue(msg_copy);
-    destTCB->taskMailbox.mailSema->up(win, dumpWin);
+    destTCB->taskMailbox.mailSema->down(message->Source_Task_Id, win, dumpWin); // Lock the destination mailbox semaphore before enqueuing
+    destTCB->taskMailbox.messageQueue->enqueue(msg_copy);                       // Enqueue the message copy into the destination mailbox
+    destTCB->taskMailbox.mailSema->up(win, dumpWin);                            // Unlock the destination mailbox semaphore after enqueuing  
 
 
     snprintf(tempStr, sizeof(tempStr),
@@ -113,13 +90,53 @@ int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
 
     return 1;
 }
-/*
-int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
+//####################################################################################################################
 
-    // TODO
+
+int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
+    if (!Mess) {
+        write_window(IPCwin, outputWriteLine++, 12, "[IPC] Message_Send: null message text pointer.");
+        return -1;
+    }
+
+    if (Mess_Type < 0 || Mess_Type > 2) {
+        write_window(IPCwin, outputWriteLine++, 12, "[IPC] Message_Send: Invalid message type. 
+            Must be 0 (Text), 1 (Service), or 2 (Notification).");
+        return -1;
+    }
+
+    // BUILD THE MESSAGE STRUCTURE
+    Message msg;
+    msg.Source_Task_Id = S_Id;
+    msg.Destination_Task_Id = D_Id;
+    msg.Msg_Size = static_cast<int>(strlen(Mess, 32)); // Get message size with max limit of 31 chars
+
+    msg.Msg_Text = new char[32]; // Allocate memory for message text
+    strncpy(msg.Msg_Text, Mess, 31); // Copy message text with size limit
+    msg.Msg_Text[31] = '\0'; // Ensure null termination
+
+    msg.Msg_Type.Message_Type_Id = Mess_Type;
+    switch (Mess_Type) {
+        case 0:
+            strncpy(msg.Msg_Type.Message_Type_Description, "Text", 63);
+            break;
+        case 1:
+            strncpy(msg.Msg_Type.Message_Type_Description, "Service", 63);
+            break;
+        case 2:
+            strncpy(msg.Msg_Type.Message_Type_Description, "Notification", 63);
+            break;
+    }
+
+    int result = Message_Send(&msg, IPCwin, IPCwin);
+    delete[] msg.Msg_Text; // Clean up allocated memory for message text
+    return result;
+    
 return 1;
 }
+//#####################################################################################################
 
+/*
 int IPC::Message_Count(int Task_Id){ // Ryan
     return 1;
 }

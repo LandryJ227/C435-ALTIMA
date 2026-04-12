@@ -132,8 +132,6 @@ int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
     int result = Message_Send(&msg, IPCwin, IPCwin);
     delete[] msg.Msg_Text; // Clean up allocated memory for message text
     return result;
-    
-return 1;
 }
 //#####################################################################################################
 
@@ -145,13 +143,52 @@ int IPC::Message_Count() {// Ryan
     return 1;
 
 }
+*/
+
+
 int IPC::Message_DeleteAll(int Task_Id) { // Julio
+    // Traverse TCB list to find task
+    tcb* ptrTCB = mcb->sched->process_table;
+    while(ptrTCB != nullptr && ptrTCB->task_id != Task_Id) {
+        ptrTCB = ptrTCB->next;
+    }
+
+    if (ptrTCB == nullptr) {
+        snprintf(tempStr, sizeof(tempStr), "[IPC] Message_DeleteAll: Task id %d not found.\n", Task_Id);
+        write_window(IPCwin, outputWriteLine++, 12, tempStr);
+        return -1;
+    }
+
+    if (ptrTCB->taskMailbox.messageQueue->isEmpty()) {
+        snprintf(tempStr, sizeof(tempStr), "[IPC] Message_DeleteAll: Mailbox for task %d is already empty.\n", Task_Id);
+        write_window(IPCwin, outputWriteLine++, 12, tempStr);
+        return 0;
+    }
+
+    ptrTCB->taskMailbox.mailSema->down(Task_Id, IPCwin, IPCwin);
+
+    int i = ptrTCB->taskMailbox.messageQueue->head;
+    int count = ptrTCB->taskMailbox.messageQueue->size;
+    int qsize = ptrTCB->taskMailbox.messageQueue->QUEUE_SIZE;
+
+    for (int n = 0; n < count; n++) {
+        delete [] ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Text;
+        ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Text = nullptr;
+        i = (i+1) % qsize; 
+    }
+
+    ptrTCB->taskMailbox.messageQueue->size = 0;
+    ptrTCB->taskMailbox.messageQueue->head = 0;
+    ptrTCB->taskMailbox.messageQueue->tail = 0;
+
+    ptrTCB->taskMailbox.mailSema->up(IPCwin, IPCwin);
+
+    snprintf(tempStr, sizeof(tempStr), "[IPC] Message_DeleteAll: Deleted %d messages from task %d mailbox.\n", count, Task_Id);
+    write_window(IPCwin, outputWriteLine++, 12, tempStr);
+
     return 1;
 
-
-    // TODO
-
-} */
+} 
 //###################################################################################################
 int IPC::Message_Receive(int Task_Id, Message *message, WINDOW* semaWin) {
     tcb* ptrTCB = mcb->sched->process_table;//start at head of process table

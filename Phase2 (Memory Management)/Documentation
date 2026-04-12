@@ -14,3 +14,10 @@ We divided the work into sections for now:
 Second group meeting (9:00 am - 12:30 pm), we continued our work over our respective functions and worked together 
 to solve issuses we encountered. We have created a custom message_queue for the mailbox and have written 
 message_send and message_receive functions. We started to implement the MCB, but still have a lot of work to do.
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+4-12-2026
+
+No more group meetings, but we continue to work on our respective functions while messaging each other through our iPhone group chat.
+We have begun the testing for the IPC message creating, sending, recieving, and deletion. As of now, our output is looking much cleaner
+and our functions seem to be able to pass, recieve, and delete messages appropriately. 

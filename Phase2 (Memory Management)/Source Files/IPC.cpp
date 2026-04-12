@@ -145,7 +145,7 @@ int IPC::Message_Count() {// Ryan
 }
 */
 
-
+//###################################################################################################
 int IPC::Message_DeleteAll(int Task_Id) { // Julio
     // Traverse TCB list to find task
     tcb* ptrTCB = mcb->sched->process_table;
@@ -153,36 +153,45 @@ int IPC::Message_DeleteAll(int Task_Id) { // Julio
         ptrTCB = ptrTCB->next;
     }
 
+    // If we reach the end of the list without finding the task, it doesn't exist
     if (ptrTCB == nullptr) {
         snprintf(tempStr, sizeof(tempStr), "[IPC] Message_DeleteAll: Task id %d not found.\n", Task_Id);
         write_window(IPCwin, outputWriteLine++, 12, tempStr);
         return -1;
     }
 
+    // If the mailbox is already empty, there's nothing to delete we return 0
     if (ptrTCB->taskMailbox.messageQueue->isEmpty()) {
         snprintf(tempStr, sizeof(tempStr), "[IPC] Message_DeleteAll: Mailbox for task %d is already empty.\n", Task_Id);
         write_window(IPCwin, outputWriteLine++, 12, tempStr);
         return 0;
     }
 
+    // Acquire mailbox semaphore before modifying message queue
+    // -Prevents another thread from enq/dq during delete process
     ptrTCB->taskMailbox.mailSema->down(Task_Id, IPCwin, IPCwin);
 
+    // Instantiate variables to navigate through circular message queue
     int i = ptrTCB->taskMailbox.messageQueue->head;
     int count = ptrTCB->taskMailbox.messageQueue->size;
     int qsize = ptrTCB->taskMailbox.messageQueue->QUEUE_SIZE;
 
+    // Loop through all messages in the queue and delete the allocated text
     for (int n = 0; n < count; n++) {
         delete [] ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Text;
         ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Text = nullptr;
         i = (i+1) % qsize; 
     }
 
+    // Reset circular queue pointers
     ptrTCB->taskMailbox.messageQueue->size = 0;
     ptrTCB->taskMailbox.messageQueue->head = 0;
     ptrTCB->taskMailbox.messageQueue->tail = 0;
 
+    // Unlock mailbox semaphore once deletion is complete
     ptrTCB->taskMailbox.mailSema->up(IPCwin, IPCwin);
 
+    // Log # of messages deleted
     snprintf(tempStr, sizeof(tempStr), "[IPC] Message_DeleteAll: Deleted %d messages from task %d mailbox.\n", count, Task_Id);
     write_window(IPCwin, outputWriteLine++, 12, tempStr);
 
@@ -198,9 +207,6 @@ int IPC::Message_Receive(int Task_Id, Message *message, WINDOW* semaWin) {
     if (ptrTCB->task_id != Task_Id) return -1;
 
     ptrTCB->taskMailbox.mailSema->down(Task_Id, IPCwin, semaWin);                      //check the mailbox semaphore
-
-    if (ptrTCB->taskMailbox.messageQueue->isEmpty()) return -1;
-
     *message = ptrTCB->taskMailbox.messageQueue->dequeue();     //grab message from queue
     ptrTCB->taskMailbox.mailSema->up(IPCwin, semaWin);                        //free up the semaphore
     if (ptrTCB->taskMailbox.messageQueue->isEmpty()) return 0; //return 0 if no more messages

@@ -4,24 +4,24 @@
 #include "IPC.h"
 #include "Ultima.h"
 
-int IPC::ipc_init(int max_tasks, MCB* mainMCB) { // Julio
+int IPC::ipc_init(int max_tasks, MCB* mainMCB) {
+    // Julio
 
     // Handle error: max_tasks must be greater than 0
     if (max_tasks <= 0 || mainMCB == nullptr){
         ipc_status = -1; // Set error status
         return -1; 
-        }
+    }
 
     this->max_tasks = max_tasks;
     this->mcb = mainMCB;
 
     ipc_status = 1; // Set success status
     return 1;
-
+}
 //###########################################################################################################
 
 int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
-    write_window(win, 25,1, "A");
 // ========================    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ==============================
 
     if (!message) {
@@ -39,6 +39,8 @@ int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
         snprintf(tempStr, sizeof(tempStr), "[IPC] Message_Send: Destination task id %d not found.\n", message->Destination_Task_Id);
         return -1;
     }
+
+    //destTCB->taskMailbox.mailSema->down(message->Destination_Task_Id, win, dumpWin);
 
     // Find source task from TCB
     tcb* sourceTCB = mcb->sched->process_table;
@@ -76,7 +78,7 @@ int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
     strncpy(msg_copy.Msg_Text, message->Msg_Text, 31);              // copy message text with size limit
     msg_copy.Msg_Text[31] = '\0';                                   // ensure null termination  
 
-    destTCB->taskMailbox.mailSema->down(message->Source_Task_Id, win, dumpWin); // Lock the destination mailbox semaphore before enqueuing
+    destTCB->taskMailbox.mailSema->down(message->Destination_Task_Id, win, dumpWin); // Lock the destination mailbox semaphore before enqueuing
     destTCB->taskMailbox.messageQueue->enqueue(msg_copy);                       // Enqueue the message copy into the destination mailbox
     destTCB->taskMailbox.mailSema->up(win, dumpWin);                            // Unlock the destination mailbox semaphore after enqueuing  
 
@@ -100,8 +102,7 @@ int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
     }
 
     if (Mess_Type < 0 || Mess_Type > 2) {
-        write_window(IPCwin, outputWriteLine++, 12, "[IPC] Message_Send: Invalid message type. 
-            Must be 0 (Text), 1 (Service), or 2 (Notification).");
+        write_window(IPCwin, outputWriteLine++, 12, "[IPC] Message_Send: Invalid message type. Must be 0 (Text), 1 (Service), or 2 (Notification).");
         return -1;
     }
 
@@ -109,7 +110,7 @@ int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
     Message msg;
     msg.Source_Task_Id = S_Id;
     msg.Destination_Task_Id = D_Id;
-    msg.Msg_Size = static_cast<int>(strlen(Mess, 32)); // Get message size with max limit of 31 chars
+    msg.Msg_Size = static_cast<int>(strnlen(Mess, 32)); // Get message size with max limit of 31 chars
 
     msg.Msg_Text = new char[32]; // Allocate memory for message text
     strncpy(msg.Msg_Text, Mess, 31); // Copy message text with size limit

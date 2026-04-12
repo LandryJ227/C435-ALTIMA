@@ -28,7 +28,7 @@ public:
 
     int ipc_init(int max_tasks, MCB* mainMCB);
 
-    int Message_Send(Message *Message, WINDOW * win, WINDOW* dumpWin);   // Julio
+    int Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin);   // Julio
 
     int Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type); // Julio
 

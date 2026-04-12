@@ -137,14 +137,33 @@ return 1;
 }
 //#####################################################################################################
 
-/*
-int IPC::Message_Count(int Task_Id){ // Ryan
-    return 1;
-}
-int IPC::Message_Count() {// Ryan
-    return 1;
+int IPC::Message_Count(int Task_Id){
+    if (mcb == nullptr || mcb->sched == nullptr) return -1;
 
+    tcb* ptrTCB = mcb->sched->process_table;
+    while (ptrTCB != nullptr && ptrTCB->task_id != Task_Id) {
+        ptrTCB = ptrTCB->next;
+    }
+
+    if (ptrTCB == nullptr) return -1;
+
+    return ptrTCB->taskMailbox.messageQueue->size;
 }
+
+int IPC::Message_Count() {
+    if (mcb == nullptr || mcb->sched == nullptr) return -1;
+
+    int total = 0;
+    tcb* ptrTCB = mcb->sched->process_table;
+
+    while (ptrTCB != nullptr) {
+        total += ptrTCB->taskMailbox.messageQueue->size;
+        ptrTCB = ptrTCB->next;
+    }
+
+    return total;
+}
+/*
 int IPC::Message_DeleteAll(int Task_Id) { // Julio
     return 1;
 

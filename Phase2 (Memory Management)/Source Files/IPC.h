@@ -4,7 +4,7 @@
 #include <time.h>
 #include "MCB.h"
 #include "message_queue.h"
-#include "sema.h"
+#include "Sema.h"
 #include "message.h"
 #include "scheduler.h"
 #include <cstring>

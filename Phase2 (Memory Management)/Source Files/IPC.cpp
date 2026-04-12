@@ -93,6 +93,8 @@ int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
 //####################################################################################################################
 
 
+int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
+    // ========================    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ==============================
 int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type, WINDOW* outputWin) { // Julio
     if (!Mess) {
         write_window(outputWin, outputWriteLine++, 12, "[IPC] Message_Send: null message text pointer.");
@@ -103,6 +105,7 @@ int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type, WINDOW* out
         write_window(outputWin, outputWriteLine++, 12, "[IPC] Message_Send: Invalid message type. Must be 0 (Text), 1 (Service), or 2 (Notification).");
         return -1;
     }
+    // =========================================   END ERROR CHECKING  ================================================
 
     // BUILD THE MESSAGE STRUCTURE
     Message msg;
@@ -131,18 +134,32 @@ int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type, WINDOW* out
     delete[] msg.Msg_Text; // Clean up allocated memory for message text
     return result;
 }
-//#####################################################################################################
+int IPC::Message_Count(int Task_Id){
+    if (mcb == nullptr || mcb->sched == nullptr) return -1;
 
-/*
-int IPC::Message_Count(int Task_Id){ // Ryan
-    return 1;
+    tcb* ptrTCB = mcb->sched->process_table;
+    while (ptrTCB != nullptr && ptrTCB->task_id != Task_Id) {
+        ptrTCB = ptrTCB->next;
+    }
+
+    if (ptrTCB == nullptr) return -1;
+
+    return ptrTCB->taskMailbox.messageQueue->size;
 }
-int IPC::Message_Count() {// Ryan
-    return 1;
 
+int IPC::Message_Count() {
+    if (mcb == nullptr || mcb->sched == nullptr) return -1;
+
+    int total = 0;
+    tcb* ptrTCB = mcb->sched->process_table;
+
+    while (ptrTCB != nullptr) {
+        total += ptrTCB->taskMailbox.messageQueue->size;
+        ptrTCB = ptrTCB->next;
+    }
+
+    return total;
 }
-*/
-
 
 int IPC::Message_DeleteAll(int Task_Id, WINDOW* outputWin) { // Julio
     // Traverse TCB list to find task
@@ -151,12 +168,14 @@ int IPC::Message_DeleteAll(int Task_Id, WINDOW* outputWin) { // Julio
         ptrTCB = ptrTCB->next;
     }
 
+    // If we reach the end of the list without finding the task, it doesn't exist
     if (ptrTCB == nullptr) {
         snprintf(tempStr, sizeof(tempStr), "[IPC] Message_DeleteAll: Task id %d not found.\n", Task_Id);
         write_window(outputWin, outputWriteLine++, 12, tempStr);
         return -1;
     }
 
+    // If the mailbox is already empty, there's nothing to delete we return 0
     if (ptrTCB->taskMailbox.messageQueue->isEmpty()) {
         snprintf(tempStr, sizeof(tempStr), "[IPC] Message_DeleteAll: Mailbox for task %d is already empty.\n", Task_Id);
         write_window(outputWin, outputWriteLine++, 12, tempStr);
@@ -164,23 +183,30 @@ int IPC::Message_DeleteAll(int Task_Id, WINDOW* outputWin) { // Julio
     }
 
     ptrTCB->taskMailbox.mailSema->down(Task_Id, outputWin, outputWin);
+    // Acquire mailbox semaphore before modifying message queue
+    // -Prevents another thread from enq/dq during delete process
 
+    // Instantiate variables to navigate through circular message queue
     int i = ptrTCB->taskMailbox.messageQueue->head;
     int count = ptrTCB->taskMailbox.messageQueue->size;
     int qsize = ptrTCB->taskMailbox.messageQueue->QUEUE_SIZE;
 
+    // Loop through all messages in the queue and delete the allocated text
     for (int n = 0; n < count; n++) {
         delete [] ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Text;
         ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Text = nullptr;
         i = (i+1) % qsize; 
     }
 
+    // Reset circular queue pointers
     ptrTCB->taskMailbox.messageQueue->size = 0;
     ptrTCB->taskMailbox.messageQueue->head = 0;
     ptrTCB->taskMailbox.messageQueue->tail = 0;
 
+    // Unlock mailbox semaphore once deletion is complete
     ptrTCB->taskMailbox.mailSema->up(outputWin, outputWin);
 
+    // Log # of messages deleted
     snprintf(tempStr, sizeof(tempStr), "[IPC] Message_DeleteAll: Deleted %d messages from task %d mailbox.\n", count, Task_Id);
     write_window(outputWin, outputWriteLine++, 12, tempStr);
 
@@ -251,7 +277,6 @@ void IPC::Message_Print(int Task_id, WINDOW* win) {
 //###################################################################################################
 void IPC::ipc_Message_Dump(WINDOW* win) {
     int outputLine = 3;
-    wclear(win);
     tcb* ptrTCB = mcb->sched->process_table;
     while (ptrTCB != NULL) {
         snprintf(tempStr, sizeof(tempStr), "All messages in queue for task #%d:", ptrTCB->task_id);

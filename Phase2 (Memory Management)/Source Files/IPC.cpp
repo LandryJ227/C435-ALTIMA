@@ -96,6 +96,7 @@ int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
 
 
 int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
+    // ========================    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ==============================
     if (!Mess) {
         write_window(IPCwin, outputWriteLine++, 12, "[IPC] Message_Send: null message text pointer.");
         return -1;
@@ -105,6 +106,7 @@ int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
         write_window(IPCwin, outputWriteLine++, 12, "[IPC] Message_Send: Invalid message type. Must be 0 (Text), 1 (Service), or 2 (Notification).");
         return -1;
     }
+    // =========================================   END ERROR CHECKING  ================================================
 
     // BUILD THE MESSAGE STRUCTURE
     Message msg;

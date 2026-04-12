@@ -1,10 +1,29 @@
-------------------------------------------------------  Project Abstract   -------------------------------------------------------------------
+=============================================================  Project Abstract   ================================================================== |
                               (Summary of phase abstracts. After each phase this will be updated)
 
 After Phase 1:
   Our ULTIMA 2.0 Project consists of the Scheduler and Semaphore aspects for our operating system. These components provide the operating system 
 with the ability to manage processes/threads, synchronize shared resources (like the screen), and see/set the status of tasks. ULTIMA 2.0 
 shows a table of the tasks that are currently active so that the user can see if a task is "running", "blocked", "ready", or "dead".
------------------------------------------------------------------------------------------------------------------------------------------------
-
+==================================================================================================================================================== |
+ 
 After Phase 2:
+  The Ultima.cpp file now shows the user 7 windows: Output window, Shared window, Thread 1 window, Thread 2 window, Scheduler Dump window,
+                                                    Semaphore Dump window, and Message Dump window.
+  The Output window is the main window that has the purpose of showing the start of the Scheduling, creation of tasks, 
+  and information of what it is actively doing. 
+
+  The Shared Window is the window that shows our semaphore working. In this window both threads are trying to pass a message into it, but only
+  one message may be displayed at a time. Currently, Thread 1 writes to it then when it is done running, Thread 2 writes to it.
+
+  The Thread Windows work together to pass/recieve messages. Thread 1 window will first write to the shared window, send a message to thread 2,
+  then end its work. Thread 2 attempts to write to the window, gets blocked when it can't, recieves a message from Thread 1, sends the message to the
+  Message Dump window, then continues to the shared window again when Thread 1 is done.
+
+  The Scheduler Dump window shows the Task ID, name, elapsed time, and status of the current tasks. In this window, Thread 2 can be seen as "BLOCKED"
+  when Thread 1 is running.
+
+  The Semaphore Dump Window shows the Sema_Value indicating if the semaphore is available or in use and The Sema_Name
+
+  The Message Dump Window shows the messages passing from Thread 1 to Thread 2.
+===================================================================================================================================================== |

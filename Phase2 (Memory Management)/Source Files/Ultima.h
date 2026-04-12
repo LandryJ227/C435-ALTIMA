@@ -13,9 +13,9 @@ inline WINDOW * threadWin;
 inline WINDOW * schedWin;
 inline WINDOW * semaWin;
 inline WINDOW * messWin;
+inline WINDOW * thread0Win;
 inline WINDOW * thread1Win;
 inline WINDOW * thread2Win;
-inline WINDOW * thread3Win;
 inline pthread_mutex_t winMutex;
 inline char tempStr[100];
 

@@ -103,6 +103,7 @@ void* thread1Fun(void* arg) {
     int taskID = args->taskID;
     MCB* mcb = args->mcb;
     char buf[256];
+    int count; //message count variable
 
     write_window(thread1Win, thread1outputLine++, 1, "Attempting to write to shared win...");
     sleep(6);
@@ -112,6 +113,11 @@ void* thread1Fun(void* arg) {
     write_window(threadWin, 4,8, "-----------------------");
     write_window(threadWin, 5,8, "| Hello from thread 1 |");
     write_window(threadWin, 6,8, "-----------------------");
+
+    //todo check if this is fine
+    count = mcb->ipc->Message_Count(0);
+    snprintf(buf, sizeof(buf), "Mailbox[0] Count Before Receive: %d", count);
+    write_window(thread1Win, thread1outputLine++, 1, buf);
 
     write_window(thread1Win, thread1outputLine++, 1, "Looking for incoming message(s)...");
     sleep(6);
@@ -207,6 +213,7 @@ void* thread3Fun(void* arg) {
     int taskID = args->taskID;
     MCB* mcb = args->mcb;
     char buf[256];
+    int count; //count formessage counts
 
     write_window(thread3Win, thread3outputLine++, 1, "Sending message to thread 1...");
     sleep(6);
@@ -218,6 +225,12 @@ void* thread3Fun(void* arg) {
     messTemp = "Got your mem access request";
     Message sendingMessage2(2, 0, 2, (char*)messTemp.c_str());
     mcb->ipc->Message_Send(&sendingMessage2, outputWin, semaWin);
+
+
+    //todo check if this is fine?
+    count = mcb->ipc->Message_Count(0); // Thread 1's count
+    snprintf(buf, sizeof(buf), "Mailbox[0] Count After Send: %d", count);
+    write_window(thread3Win, thread3outputLine++, 1, buf);
 
     write_window(thread3Win, thread3outputLine++, 1, "Attempting to write to shared win...");
     sleep(6);

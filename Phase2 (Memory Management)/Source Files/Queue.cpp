@@ -35,18 +35,20 @@ bool queue::isEmpty() {
 }
 
 //Formatted display of the content within the queue.
-void queue::printQueue() {
+string queue::printQueue() {
     //Empty case
     if (head == tail) {
-        cout << "Queue is empty" << endl;
+        return "Queue is empty";
     }
     else {
+        string output = "";
         //Printing from head to tail of the queue.
         int i = head;
         while (i != tail) {
-            cout << taskQueue[i] << endl;
+            output += std::to_string(taskQueue[i]) + " ";
             i = (i + 1) % QUEUE_SIZE;   // wrap around
         }
+        return output;
     }
 }
 

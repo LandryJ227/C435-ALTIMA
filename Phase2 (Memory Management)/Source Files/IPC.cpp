@@ -40,8 +40,6 @@ int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
         return -1;
     }
 
-    //destTCB->taskMailbox.mailSema->down(message->Destination_Task_Id, win, dumpWin);
-
     // Find source task from TCB
     tcb* sourceTCB = mcb->sched->process_table;
     while (sourceTCB != nullptr && sourceTCB->task_id != message->Source_Task_Id) {
@@ -95,14 +93,14 @@ int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
 //####################################################################################################################
 
 
-int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
+int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type, WINDOW* outputWin) { // Julio
     if (!Mess) {
-        write_window(IPCwin, outputWriteLine++, 12, "[IPC] Message_Send: null message text pointer.");
+        write_window(outputWin, outputWriteLine++, 12, "[IPC] Message_Send: null message text pointer.");
         return -1;
     }
 
     if (Mess_Type < 0 || Mess_Type > 2) {
-        write_window(IPCwin, outputWriteLine++, 12, "[IPC] Message_Send: Invalid message type. Must be 0 (Text), 1 (Service), or 2 (Notification).");
+        write_window(outputWin, outputWriteLine++, 12, "[IPC] Message_Send: Invalid message type. Must be 0 (Text), 1 (Service), or 2 (Notification).");
         return -1;
     }
 
@@ -129,7 +127,7 @@ int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
             break;
     }
 
-    int result = Message_Send(&msg, IPCwin, IPCwin);
+    int result = Message_Send(&msg, outputWin, outputWin);
     delete[] msg.Msg_Text; // Clean up allocated memory for message text
     return result;
 }
@@ -146,7 +144,7 @@ int IPC::Message_Count() {// Ryan
 */
 
 
-int IPC::Message_DeleteAll(int Task_Id) { // Julio
+int IPC::Message_DeleteAll(int Task_Id, WINDOW* outputWin) { // Julio
     // Traverse TCB list to find task
     tcb* ptrTCB = mcb->sched->process_table;
     while(ptrTCB != nullptr && ptrTCB->task_id != Task_Id) {
@@ -155,17 +153,17 @@ int IPC::Message_DeleteAll(int Task_Id) { // Julio
 
     if (ptrTCB == nullptr) {
         snprintf(tempStr, sizeof(tempStr), "[IPC] Message_DeleteAll: Task id %d not found.\n", Task_Id);
-        write_window(IPCwin, outputWriteLine++, 12, tempStr);
+        write_window(outputWin, outputWriteLine++, 12, tempStr);
         return -1;
     }
 
     if (ptrTCB->taskMailbox.messageQueue->isEmpty()) {
         snprintf(tempStr, sizeof(tempStr), "[IPC] Message_DeleteAll: Mailbox for task %d is already empty.\n", Task_Id);
-        write_window(IPCwin, outputWriteLine++, 12, tempStr);
+        write_window(outputWin, outputWriteLine++, 12, tempStr);
         return 0;
     }
 
-    ptrTCB->taskMailbox.mailSema->down(Task_Id, IPCwin, IPCwin);
+    ptrTCB->taskMailbox.mailSema->down(Task_Id, outputWin, outputWin);
 
     int i = ptrTCB->taskMailbox.messageQueue->head;
     int count = ptrTCB->taskMailbox.messageQueue->size;
@@ -181,42 +179,42 @@ int IPC::Message_DeleteAll(int Task_Id) { // Julio
     ptrTCB->taskMailbox.messageQueue->head = 0;
     ptrTCB->taskMailbox.messageQueue->tail = 0;
 
-    ptrTCB->taskMailbox.mailSema->up(IPCwin, IPCwin);
+    ptrTCB->taskMailbox.mailSema->up(outputWin, outputWin);
 
     snprintf(tempStr, sizeof(tempStr), "[IPC] Message_DeleteAll: Deleted %d messages from task %d mailbox.\n", count, Task_Id);
-    write_window(IPCwin, outputWriteLine++, 12, tempStr);
+    write_window(outputWin, outputWriteLine++, 12, tempStr);
 
     return 1;
 
 } 
 //###################################################################################################
-int IPC::Message_Receive(int Task_Id, Message *message, WINDOW* semaWin) {
+int IPC::Message_Receive(int Task_Id, Message *message, WINDOW* semaWin, WINDOW* outputWin) {
     tcb* ptrTCB = mcb->sched->process_table;//start at head of process table
     while (ptrTCB->task_id != Task_Id && ptrTCB->next != NULL) {//search for correct tcb with task id
         ptrTCB = ptrTCB->next;
     }
     if (ptrTCB->task_id != Task_Id) return -1;
 
-    ptrTCB->taskMailbox.mailSema->down(Task_Id, IPCwin, semaWin);                      //check the mailbox semaphore
+    ptrTCB->taskMailbox.mailSema->down(Task_Id, outputWin, semaWin);                      //check the mailbox semaphore
 
     if (ptrTCB->taskMailbox.messageQueue->isEmpty()) return -1;
 
     *message = ptrTCB->taskMailbox.messageQueue->dequeue();     //grab message from queue
-    ptrTCB->taskMailbox.mailSema->up(IPCwin, semaWin);                        //free up the semaphore
+    ptrTCB->taskMailbox.mailSema->up(outputWin, semaWin);                        //free up the semaphore
     if (ptrTCB->taskMailbox.messageQueue->isEmpty()) return 0; //return 0 if no more messages
     else return 1;                                           //still messages left in mailbox
 }
 //###################################################################################################
-int IPC::Message_Receive(int Task_Id, char *Mess, int *Mess_Type, WINDOW* semaWin) {
+int IPC::Message_Receive(int Task_Id, char *Mess, int *Mess_Type, WINDOW* semaWin, WINDOW* outputWin) {
     tcb* ptrTCB = mcb->sched->process_table;//start at head of process table
     while (ptrTCB->task_id != Task_Id && ptrTCB->next != NULL) {//search for correct tcb with task id
         ptrTCB = ptrTCB->next;
     }
     if (ptrTCB->task_id != Task_Id) return -1;
 
-    ptrTCB->taskMailbox.mailSema->down(Task_Id, IPCwin, semaWin);//check the mailbox semaphore
+    ptrTCB->taskMailbox.mailSema->down(Task_Id, outputWin, semaWin);//check the mailbox semaphore
     Message tempMessage = ptrTCB->taskMailbox.messageQueue->dequeue();     //grab message from queue
-    ptrTCB->taskMailbox.mailSema->up(IPCwin, semaWin);         //free up the semaphore
+    ptrTCB->taskMailbox.mailSema->up(outputWin, semaWin);         //free up the semaphore
     Mess = tempMessage.Msg_Text;                                         //load values into ptr parameters
     *Mess_Type = tempMessage.Msg_Type.Message_Type_Id;
     if (ptrTCB->taskMailbox.messageQueue->isEmpty()) return 0;             //return 0 if no more messages
@@ -225,22 +223,35 @@ int IPC::Message_Receive(int Task_Id, char *Mess, int *Mess_Type, WINDOW* semaWi
 //###################################################################################################
 void IPC::Message_Print(int Task_id, WINDOW* win) {
     int outputLine = 3;
+    char buf[256];
+
+    wclear(win);
+    write_window(win, 1, 16, "--- Message Dump Win ---");
     tcb* ptrTCB = mcb->sched->process_table;//start at head of process table
     while (ptrTCB->task_id != Task_id && ptrTCB->next != NULL) {//search for correct tcb with task id
         ptrTCB = ptrTCB->next;
     }
-    snprintf(tempStr, sizeof(tempStr), "All messages in queue for task #%d:", Task_id);
-    write_window(win, outputLine++, 2, tempStr);
+    //snprintf(tempStr, sizeof(tempStr), "All messages in queue for task #%d:", Task_id);
+    //write_window(win, outputLine++, 2, tempStr);
 
+    snprintf(buf, sizeof(buf), "Called by thread %d:", Task_id);
+    write_window(win, outputLine++, 2, buf);
+    write_window(win, outputLine++, 2, "Source-ID   Dest-ID   Message-Content               Size     Type");
     for (int i = ptrTCB->taskMailbox.messageQueue->head; i != ptrTCB->taskMailbox.messageQueue->tail; i = (i + 1) % ptrTCB->taskMailbox.messageQueue->QUEUE_SIZE) {
-        string tempMessage = ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Text;
-        write_window(win, outputLine++, 2, tempMessage.c_str());
+        snprintf(buf, sizeof(buf), "    %d          %d      %s      %d        %d",
+            ptrTCB->taskMailbox.messageQueue->messageQueue[i].Source_Task_Id,
+            ptrTCB->taskMailbox.messageQueue->messageQueue[i].Destination_Task_Id,
+            ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Text,
+            ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Size,
+            ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Type.Message_Type_Id);
+        write_window(win, outputLine++, 2, buf);
     }
 
 }
 //###################################################################################################
 void IPC::ipc_Message_Dump(WINDOW* win) {
     int outputLine = 3;
+    wclear(win);
     tcb* ptrTCB = mcb->sched->process_table;
     while (ptrTCB != NULL) {
         snprintf(tempStr, sizeof(tempStr), "All messages in queue for task #%d:", ptrTCB->task_id);

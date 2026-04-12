@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+using namespace std;
 
 class queue {
 public:
@@ -18,5 +20,5 @@ public:
     //Checking if there are elements within the queue.
     bool isEmpty();
     //Formatted display of the content within the queue.
-    void printQueue();
+    string printQueue();
 };

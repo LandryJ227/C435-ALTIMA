@@ -11,7 +11,7 @@
 
 class IPC {
     MCB* mcb = nullptr;
-    WINDOW* IPCwin;
+    //WINDOW* IPCwin;
 
 public:
 /*  --------------------------------------------------------
@@ -30,12 +30,12 @@ public:
 
     int Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin);   // Julio
 
-    int Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type); // Julio
+    int Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type, WINDOW* outputWin); // Julio
 
 
-    int Message_Receive(int Task_Id, Message *message, WINDOW* semaWin); // Jacob
+    int Message_Receive(int Task_Id, Message *message, WINDOW* semaWin, WINDOW* outputWin); // Jacob
 
-    int Message_Receive(int Task_Id, char *Mess, int *Mess_Type, WINDOW* semaWin); // Jacob
+    int Message_Receive(int Task_Id, char *Mess, int *Mess_Type, WINDOW* semaWin, WINDOW* outputWin); // Jacob
 
     int Message_Count(int Task_Id); // Ryan
 
@@ -43,7 +43,7 @@ public:
 
     void Message_Print(int Task_Id, WINDOW* win); // Jacob
 
-    int Message_DeleteAll(int Task_Id); // Julio
+    int Message_DeleteAll(int Task_Id, WINDOW* outputWin); // Julio
 
     void ipc_Message_Dump(WINDOW* win);
 

@@ -55,7 +55,7 @@ void semaphore::up(WINDOW* win, WINDOW* dumpWin)
 {
     pthread_mutex_lock(&mutex);
     int task_id;
-    snprintf(tempStr, sizeof(tempStr), "TaskID: %d, LuckID: %d", sched_ptr->get_task_id(), lucky_task);
+    //snprintf(tempStr, sizeof(tempStr), "TaskID: %d, LuckID: %d", sched_ptr->get_task_id(), lucky_task);
     write_window(win, outputWriteLine++, 1, tempStr);
     box(win, 0 , 0);
     wrefresh(win);
@@ -97,7 +97,7 @@ void semaphore::dump(int level, WINDOW* win)
             snprintf(tempStr, sizeof(tempStr), "Obtained by Task-ID: %d", lucky_task);
             write_window(win, 5, 1, tempStr);
             break;
-        case 1:
+        case 1: {
             snprintf(tempStr, sizeof(tempStr), "Sema_Value: %d", sema_value);
             write_window(win, 3, 1, tempStr);
             snprintf(tempStr, sizeof(tempStr), "Sema_Name: %s", resource_name.c_str());
@@ -105,11 +105,12 @@ void semaphore::dump(int level, WINDOW* win)
             snprintf(tempStr, sizeof(tempStr), "Obtained by Task-ID: %d", lucky_task);
             write_window(win, 5, 1, tempStr);
             write_window(win, 6, 1, "Sema-Queue: ");
-            //sema_queue.printQueue();
+            string queueOutput = sema_queue.printQueue();
+            write_window(win, 7, 1, queueOutput.c_str());
             break;
+        }
         default:
             write_window(win, 3, 1, "ERROR in SEMAPHORE DUMP level");
-
     }
     box(win, 0 , 0);
     wrefresh(win);

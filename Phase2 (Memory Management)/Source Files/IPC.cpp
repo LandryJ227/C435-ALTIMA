@@ -161,6 +161,9 @@ int IPC::Message_Receive(int Task_Id, Message *message, WINDOW* semaWin) {
     if (ptrTCB->task_id != Task_Id) return -1;
 
     ptrTCB->taskMailbox.mailSema->down(Task_Id, IPCwin, semaWin);                      //check the mailbox semaphore
+
+    if (ptrTCB->taskMailbox.messageQueue->isEmpty()) return -1;
+
     *message = ptrTCB->taskMailbox.messageQueue->dequeue();     //grab message from queue
     ptrTCB->taskMailbox.mailSema->up(IPCwin, semaWin);                        //free up the semaphore
     if (ptrTCB->taskMailbox.messageQueue->isEmpty()) return 0; //return 0 if no more messages

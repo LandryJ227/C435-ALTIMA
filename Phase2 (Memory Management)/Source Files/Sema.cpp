@@ -24,7 +24,7 @@ void semaphore::down(int taskID, WINDOW* win, WINDOW* dumpWin) {
     pthread_mutex_lock(&mutex);
     if (taskID == lucky_task) { //taskID already obtained resource.
         snprintf(tempStr, sizeof(tempStr), "Task %d already has the resource! Ignore request.", lucky_task);
-        write_window(win, outputWriteLine++, 12, tempStr);
+        write_window(win, outputWriteLine++, 1, tempStr);
         box(win, 0 , 0);
         wrefresh(win);
         dump(1, dumpWin);
@@ -39,7 +39,7 @@ void semaphore::down(int taskID, WINDOW* win, WINDOW* dumpWin) {
             sema_queue.enqueue(taskID);
             sched_ptr->set_state(taskID, "BLOCKED");
             snprintf(tempStr, sizeof(tempStr), "Block: %d and place into semaphore queue", taskID);
-            write_window(win, outputWriteLine++, 12, tempStr);
+            write_window(win, outputWriteLine++, 1, tempStr);
             box(win, 0 , 0);
             wrefresh(win);
             dump(1, dumpWin);
@@ -56,12 +56,12 @@ void semaphore::up(WINDOW* win, WINDOW* dumpWin)
     pthread_mutex_lock(&mutex);
     int task_id;
     snprintf(tempStr, sizeof(tempStr), "TaskID: %d, LuckID: %d", sched_ptr->get_task_id(), lucky_task);
-    write_window(win, outputWriteLine++, 12, tempStr);
+    write_window(win, outputWriteLine++, 1, tempStr);
     box(win, 0 , 0);
     wrefresh(win);
 
-    if(sched_ptr->get_task_id() == lucky_task)
-    {
+    //if(sched_ptr->get_task_id() == lucky_task)
+    //{
         if(sema_queue.isEmpty()) {
             sema_value++;
             lucky_task = -1;
@@ -71,16 +71,16 @@ void semaphore::up(WINDOW* win, WINDOW* dumpWin)
             task_id = sema_queue.dequeue();
             sched_ptr->set_state(task_id, READY);
             snprintf(tempStr, sizeof(tempStr), "UnBlock: %d and release from the queue", task_id);
-            write_window(win, outputWriteLine++, 12, tempStr);
+            write_window(win, outputWriteLine++, 1, tempStr);
             lucky_task = task_id;
             snprintf(tempStr, sizeof(tempStr), "Luck Task = %d", lucky_task);
-            write_window(win, outputWriteLine++, 12, tempStr);
+            write_window(win, outputWriteLine++, 1, tempStr);
             box(win, 0 , 0);
             wrefresh(win);
             dump(1, dumpWin);
             pthread_cond_signal(&cond);
         }
-    }
+    //}
     pthread_mutex_unlock(&mutex);
 }
 

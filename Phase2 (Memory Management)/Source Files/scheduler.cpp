@@ -88,25 +88,25 @@ void scheduler::yield(WINDOW* win) {
     }
 
     if (currentTCB == nullptr) {
-        write_window(win, outputWriteLine++, 12, "Current task not found.");
+        write_window(win, outputWriteLine++, 1, "Current task not found.");
         return;
     }
     snprintf(tempStr, sizeof(tempStr), "Current Task #%d is trying to Yield", current_task);
-    write_window(win, outputWriteLine++, 12, tempStr);
+    write_window(win, outputWriteLine++, 1, tempStr);
 
     clock_t elapsed_time = clock() - get_start_time(current_task);
     snprintf(tempStr, sizeof(tempStr), "Task: %d. Elapsed time: %d.", current_task, elapsed_time);
-    write_window(win, outputWriteLine++, 12, tempStr);
+    write_window(win, outputWriteLine++, 1, tempStr);
     snprintf(tempStr, sizeof(tempStr), "Current Quantum: %d", current_quantum);
-    write_window(win, outputWriteLine++, 12, tempStr);
+    write_window(win, outputWriteLine++, 1, tempStr);
 
     if (elapsed_time < current_quantum) {
         snprintf(tempStr, sizeof(tempStr), "NO Yield! (Task: %d still has some quantum left)", current_task);
-        write_window(win, outputWriteLine++, 12, tempStr);
+        write_window(win, outputWriteLine++, 1, tempStr);
     }
 
-    snprintf(tempStr, sizeof(tempStr), "Yielding....(Switching from task #%d to next ready task", current_task);
-    write_window(win, outputWriteLine++, 12, tempStr);
+    snprintf(tempStr, sizeof(tempStr), "Yielding..(Switching from task #%d to next ready task)", current_task);
+    write_window(win, outputWriteLine++, 1, tempStr);
 
     tcb* nextTCB = (currentTCB->next == nullptr ? process_table : currentTCB->next);
 
@@ -125,9 +125,9 @@ void scheduler::yield(WINDOW* win) {
         nextTCB->start_time = clock();
         nextTCB->state = "RUNNING";
         snprintf(tempStr, sizeof(tempStr), "Started Running Task #%d", current_task);
-        write_window(win, outputWriteLine++, 12, tempStr);
+        write_window(win, outputWriteLine++, 1, tempStr);
     } else {
-        write_window(win, outputWriteLine++, 12, "No other READY task found.");
+        write_window(win, outputWriteLine++, 1, "No other READY task found.");
     }
     box(win, 0 , 0);
     wrefresh(win);
@@ -136,12 +136,12 @@ void scheduler::yield(WINDOW* win) {
 //#########################################################
 int scheduler::create_task(string name, WINDOW* win) {
     snprintf(tempStr, sizeof(tempStr), "Creating task #%d...", next_available_task_id);
-    write_window(win, outputWriteLine++, 12, tempStr);
+    write_window(win, outputWriteLine++, 1, tempStr);
     box(win, 0 , 0);
     wrefresh(win);
     sleep(1);
     if (next_available_task_id == MAX_TASKS) {      //check if exeeding max tasks
-        write_window(win, outputWriteLine++,12,  "FAILED: Available tasks exeeded.");
+        write_window(win, outputWriteLine++,1,  "FAILED: Available tasks exeeded.");
         sleep(1);
         return (-1);                                //return -1 for error
     }
@@ -159,7 +159,7 @@ int scheduler::create_task(string name, WINDOW* win) {
     if (process_table == nullptr) {                 //if no tasks yet
         process_table = newTask;                    //process_table will point to this task
         snprintf(tempStr, sizeof(tempStr), "Successfully created task #%d!", newTask->task_id);
-        write_window(win, outputWriteLine++, 12, tempStr);
+        write_window(win, outputWriteLine++, 1, tempStr);
         box(win, 0 , 0);
         wrefresh(win);
         sleep(1);
@@ -173,7 +173,7 @@ int scheduler::create_task(string name, WINDOW* win) {
     ptrTCB->next = newTask;                      //add this new task to the end of process list
 
     snprintf(tempStr, sizeof(tempStr), "Successfully created task #%d!", newTask->task_id);
-    write_window(win, outputWriteLine++,12, tempStr);
+    write_window(win, outputWriteLine++,1, tempStr);
     box(win, 0 , 0);
     wrefresh(win);
     sleep(1);
@@ -213,18 +213,19 @@ void scheduler::garbage_collect(int T_ID) {
 
 void scheduler::dump(WINDOW* win) {
     int count = 6;
+    char buf[256];
     wclear(win);
     write_window(win, 1, 15, "--- Scheduler Dump Win ---");
-    snprintf(tempStr, sizeof(tempStr), "Quantum = %d", current_quantum);
-    write_window(win, 4, 4, tempStr);
+    snprintf(buf, sizeof(buf), "Quantum = %d", current_quantum);
+    write_window(win, 4, 4, buf);
     write_window(win, 5, 4,  "Task-ID  Task Name     Elapsed Time   State");
     tcb* ptrTCB = process_table;
     write_window(win, count++, 4, "-------------------------------------------");
     while (ptrTCB != nullptr) {
-        snprintf(tempStr, sizeof(tempStr), "   %d     %s      ", ptrTCB->task_id, ptrTCB->taskName.c_str());
-        write_window(win, count, 4, tempStr);
-        snprintf(tempStr, sizeof(tempStr), "%d        %s", (clock() - ptrTCB->start_time), ptrTCB->state.c_str());
-        write_window(win, count++, 33, tempStr);
+        snprintf(buf, sizeof(buf), "   %d     %s      ", ptrTCB->task_id, ptrTCB->taskName.c_str());
+        write_window(win, count, 4, buf);
+        snprintf(buf, sizeof(buf), "%d        %s", (clock() - ptrTCB->start_time), ptrTCB->state.c_str());
+        write_window(win, count++, 33, buf);
         ptrTCB = ptrTCB->next;
     }
     write_window(win, count, 4, "-------------------------------------------");

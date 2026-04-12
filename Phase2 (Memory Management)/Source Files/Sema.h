@@ -1,7 +1,8 @@
 #pragma once
 #include "Queue.h"
-#include "scheduler.h"
 #include <pthread.h>
+#include <ncurses.h>
+#include <string>
 using namespace std;
 
 class scheduler;

@@ -4,6 +4,7 @@
 #include <string>
 #include <pthread.h>
 #include "Ultima.h"
+#include "scheduler.h"
 
 
 using namespace std;

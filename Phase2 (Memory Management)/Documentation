@@ -1,4 +1,4 @@
--------------------------------------------------------    Documentation    ---------------------------------------------------------------------
+---------------------------------------------------    Documentation    ---------------------------------------------------------------------
 4-7-2026
 
 First group meeting, we went over the Phase 2 Assignment sheet together and started our brainstorming 
@@ -8,3 +8,9 @@ We divided the work into sections for now:
   Jacob: Message_rec, message_print, ipc_mess_dump
   Ryan: Message_count, MCB
 --------------------------------------------------------------------------------------------------------------------------------------------------
+
+4-10-2026
+
+Second group meeting (9:00 am - 12:30 pm), we continued our work over our respective functions and worked together 
+to solve issuses we encountered. We have created a custom message_queue for the mailbox and have written 
+message_send and message_receive functions. We started to implement the MCB, but still have a lot of work to do.

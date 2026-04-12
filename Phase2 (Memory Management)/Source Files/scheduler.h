@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include "scheduler.h"
 #include <iostream>
 #include <assert.h>
 #include <time.h>
@@ -9,8 +8,18 @@
 #include <termios.h>
 #include <fcntl.h>
 #include "Queue.h"
+#include "message_queue.h"
+#include "Sema.h"
 
 using namespace std;
+class semaphore;
+class message_queue;
+
+struct mailbox {
+    message_queue* messageQueue;
+    semaphore* mailSema;
+    mailbox() : messageQueue(nullptr), mailSema(nullptr) {}
+};
 
 struct tcb {
     int task_id;
@@ -19,10 +28,6 @@ struct tcb {
     clock_t start_time;
     tcb *next;
     mailbox taskMailbox;
-};
-struct mailbox {
-    Message messageQueue[32];
-    Semaphore mailSema;
 };
 
 const string READY = "READY";

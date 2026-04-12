@@ -1,9 +1,13 @@
 #include "message_queue.h"
 #include <iostream>
 #include "IPC.h"
+#include "message.h"
+
+class Message;
+
 using namespace std;
 //Function to add an element to the back of the queue
-void message_queue::enqueue(IPC::Message T) {
+void message_queue::enqueue(Message T) {
     //Updating queue within a circular queue while supporting shift of queue.
     if ((tail + 1) % QUEUE_SIZE != head) {
         messageQueue[tail] = T;
@@ -14,8 +18,8 @@ void message_queue::enqueue(IPC::Message T) {
 }
 
 //Function to remove and return to move the front
-IPC::Message message_queue::dequeue() {
-    IPC::Message holdMessage = messageQueue[head];
+Message message_queue::dequeue() {
+    Message holdMessage = messageQueue[head];
     if (head != tail) {
         //Updating queue within a circular queue while supporting shift of queue.
         head = (head + 1) % QUEUE_SIZE;
@@ -34,4 +38,6 @@ bool message_queue::isEmpty() {
     else return false;
 }
 
-
+//Formatted display of the content within the queue.
+//todo!
+//void message_queue::printQueue();

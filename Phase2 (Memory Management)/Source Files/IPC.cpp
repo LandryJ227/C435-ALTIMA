@@ -93,7 +93,6 @@ int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
 //####################################################################################################################
 
 
-int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
     // ========================    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ==============================
 int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type, WINDOW* outputWin) { // Julio
     if (!Mess) {

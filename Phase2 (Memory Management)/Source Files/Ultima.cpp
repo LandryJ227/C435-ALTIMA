@@ -166,6 +166,10 @@ void* thread1Fun(void* arg) {
     mcb->ipc->Message_Send(&sendingMessage, outputWin, semaWin);
     write_window(thread1Win, thread1outputLine++, 1, "Successfully sent!");
 
+    int count = mcb->ipc->Message_Count(0);
+    snprintf(buf, sizeof(buf), "Mailbox[0] Count After Send: %d", count);
+    write_window(thread1Win, thread1outputLine++, 1, buf);
+
     write_window(thread1Win, thread1outputLine++, 1, "Attempting to write to shared win...");
     sleep(5);
 
@@ -186,8 +190,16 @@ void* thread1Fun(void* arg) {
     mcb->ipc->Message_Send(&sendingMessage2, outputWin, semaWin);
     write_window(thread1Win, thread1outputLine++, 1, "Successfully sent!");
 
+    count = mcb->ipc->Message_Count(2);
+    snprintf(buf, sizeof(buf), "Mailbox[2] Count After Send: %d", count);
+    write_window(thread1Win, thread1outputLine++, 1, buf);
 
     write_window(thread1Win, thread1outputLine++, 1, "Looking for incoming message(s)...");
+
+    count = mcb->ipc->Message_Count(1);
+    snprintf(buf, sizeof(buf), "Mailbox[1] Count Before Receive: %d", count);
+    write_window(thread1Win, thread1outputLine++, 1, buf);
+
     sleep(5);
     messWinSem->down(taskID, outputWin, semaWin);
     mcb->ipc->Message_Print(1, messWin);
@@ -200,6 +212,11 @@ void* thread1Fun(void* arg) {
         //sleep(2);
         messageIn = mcb->ipc->Message_Receive(1, &receivingMessage, semaWin, outputWin);
     }
+
+    count = mcb->ipc->Message_Count(1);
+    snprintf(buf, sizeof(buf), "Mailbox[1] Count After Receive: %d", count);
+    write_window(thread1Win, thread1outputLine++, 1, buf);
+
     write_window(thread1Win, thread1outputLine++, 1, "Ending Thread 1");
     sleep(2);
     return nullptr;
@@ -224,6 +241,10 @@ void* thread2Fun(void* arg) {
     mcb->ipc->Message_Send(&sendingMessage, outputWin, semaWin);
     write_window(thread2Win, thread2outputLine++, 1, "Successfully sent!");
 
+    int count = mcb->ipc->Message_Count(0);
+    snprintf(buf, sizeof(buf), "Mailbox[0] Count After Send: %d", count);
+    write_window(thread2Win, thread2outputLine++, 1, buf);
+
     write_window(thread2Win, thread2outputLine++, 1, "Attempting to write to shared win...");
     sleep(5);
 
@@ -238,6 +259,11 @@ void* thread2Fun(void* arg) {
     threadWinSem->up(outputWin, semaWin);
 
     write_window(thread2Win, thread2outputLine++, 1, "Looking for incoming message(s)...");
+
+    count = mcb->ipc->Message_Count(2);
+    snprintf(buf, sizeof(buf), "Mailbox[2] Count Before Receive: %d", count);
+    write_window(thread2Win, thread2outputLine++, 1, buf);
+
     sleep(6);
     messWinSem->down(taskID, outputWin, semaWin);
     mcb->ipc->Message_Print(2, messWin);
@@ -250,6 +276,10 @@ void* thread2Fun(void* arg) {
         //sleep(2);
         messageIn = mcb->ipc->Message_Receive(2, &receivingMessage, semaWin, outputWin);
     }
+
+    count = mcb->ipc->Message_Count(2);
+    snprintf(buf, sizeof(buf), "Mailbox[2] Count After Receive: %d", count);
+    write_window(thread2Win, thread2outputLine++, 1, buf);
 
     write_window(thread2Win, thread2outputLine++, 1, "Ending Thread 2");
     sleep(2);

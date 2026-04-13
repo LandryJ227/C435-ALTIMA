@@ -106,7 +106,6 @@ int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type, WINDOW* out
         return -1;
     }
     // =========================================   END ERROR CHECKING  ================================================
-
     // BUILD THE MESSAGE STRUCTURE
     Message msg;
     msg.Source_Task_Id = S_Id;

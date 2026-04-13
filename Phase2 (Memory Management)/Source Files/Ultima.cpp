@@ -63,6 +63,7 @@ int main() {
     write_window(thread2Win, 1, 15, "--- Thread 2 Win ---");
     write_window(threadWin, 1, 15, "--- Shared Win ---");
 
+
     //create pthreads
     pthread_t thread0ID, thread1ID, thread2ID;
     sched.start(outputWin);

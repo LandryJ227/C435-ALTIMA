@@ -49,8 +49,8 @@ int main() {
     schedWin = create_window(17, 70, 1, 113);
     semaWin = create_window(17, 70, 18, 113);
     messWin = create_window(18, 70, 35, 113);
-    thread0Win = create_window(15, 55, 14, 57);
-    thread1Win = create_window(15, 55, 29, 57);
+    thread0Win = create_window(14, 55, 14, 57);
+    thread1Win = create_window(16, 55, 28, 57);
     thread2Win = create_window(15, 55, 44, 57);
 
     //------------------- LABEL WINDOWS -------------------
@@ -126,7 +126,7 @@ int main() {
 //####################################################################################################
 void* thread0Fun(void* arg) {
     //initialize variables and objects needed
-    int thread0outputLine=3;
+    int thread0outputLine=2;
     ThreadArgs* args = (ThreadArgs*)arg;
     semaphore* threadWinSem = args->threadWinSem;
     semaphore* messWinSem = args->messWinSem;
@@ -191,7 +191,7 @@ void* thread0Fun(void* arg) {
 //####################################################################################################
 void* thread1Fun(void* arg) {
     //initialize variables and objects needed
-    int thread1outputLine=3;
+    int thread1outputLine=2;
     ThreadArgs* args = (ThreadArgs*)arg;
     semaphore* threadWinSem = args->threadWinSem;
     semaphore* messWinSem = args->messWinSem;
@@ -246,16 +246,18 @@ void* thread1Fun(void* arg) {
     snprintf(buf, sizeof(buf), "Mailbox[2] Count After Send: %d", count);
     write_window(thread1Win, thread1outputLine++, 1, buf);
 
+    //Look for incoming messages
+    write_window(thread1Win, thread1outputLine++, 1, "Looking for incoming message(s)...");
+    sleep(5);
+
+    messWinSem->down(taskID, outputWin, semaWin);
+    mcb->ipc->Message_Print(1, messWin);
+    messWinSem->up(outputWin, semaWin);
+
     count = mcb->ipc->Message_Count(1);
     snprintf(buf, sizeof(buf), "Mailbox[1] Count Before Receive: %d", count);
     write_window(thread1Win, thread1outputLine++, 1, buf);
 
-    //Look for incoming messages
-    write_window(thread1Win, thread1outputLine++, 1, "Looking for incoming message(s)...");
-    sleep(5);
-    messWinSem->down(taskID, outputWin, semaWin);
-    mcb->ipc->Message_Print(1, messWin);
-    messWinSem->up(outputWin, semaWin);
     Message receivingMessage;
     //Check if any incoming messages
     int messageIn = mcb->ipc->Message_Receive(1, &receivingMessage, semaWin, outputWin);
@@ -275,7 +277,7 @@ void* thread1Fun(void* arg) {
 }
 void* thread2Fun(void* arg) {
     //initialize variables and objects needed
-    int thread2outputLine=3;
+    int thread2outputLine=2;
     ThreadArgs* args = (ThreadArgs*)arg;
     semaphore* threadWinSem = args->threadWinSem;
     semaphore* messWinSem = args->messWinSem;
@@ -319,16 +321,17 @@ void* thread2Fun(void* arg) {
 
 
 
-    count = mcb->ipc->Message_Count(2);
-    snprintf(buf, sizeof(buf), "Mailbox[2] Count Before Receive: %d", count);
-    write_window(thread2Win, thread2outputLine++, 1, buf);
-
     //Check for incoming messages
     write_window(thread2Win, thread2outputLine++, 1, "Looking for incoming message(s)...");
     sleep(6);
     messWinSem->down(taskID, outputWin, semaWin);
     mcb->ipc->Message_Print(2, messWin);
     messWinSem->up(outputWin, semaWin);
+
+    count = mcb->ipc->Message_Count(2);
+    snprintf(buf, sizeof(buf), "Mailbox[2] Count Before Receive: %d", count);
+    write_window(thread2Win, thread2outputLine++, 1, buf);
+
     Message receivingMessage;
     int messageIn = mcb->ipc->Message_Receive(2, &receivingMessage, semaWin, outputWin);
     while (messageIn != -1) {

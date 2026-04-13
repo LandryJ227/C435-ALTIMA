@@ -21,8 +21,9 @@ int IPC::ipc_init(int max_tasks, MCB* mainMCB) {
 }
 //###########################################################################################################
 
-int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
-// ========================    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ==============================
+int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin) {
+    // Julio
+    // ========================    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ==============================
 
     if (!message) {
         cerr << "[IPC] Message_Send: null message pointer.\n";
@@ -62,9 +63,9 @@ int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
         snprintf(tempStr, sizeof(tempStr), "[IPC] Message_Send: Destination mailbox for task %d is full.\n", message->Destination_Task_Id);
         return -1;
     }
-//===================================== END ERROR CHECKING ================================================================
+    //===================================== END ERROR CHECKING ================================================================
 
-//================================= BUILD CLEAN COPY OF MESSAGE ===========================================================
+    //================================= BUILD CLEAN COPY OF MESSAGE ===========================================================
     Message msg_copy; // Create a copy of the message to enqueue
 
     msg_copy.Source_Task_Id = message->Source_Task_Id;              // copy source task id
@@ -93,7 +94,6 @@ int IPC::Message_Send(Message *message, WINDOW * win, WINDOW* dumpWin){ // Julio
 //####################################################################################################################
 
 
-int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type) { // Julio
     // ========================    ERROR CHECKING BEFORE COPYING MESSAGE OR ENQUEUING  ==============================
 int IPC::Message_Send(int S_Id, int D_Id, char *Mess, int Mess_Type, WINDOW* outputWin) { // Julio
     if (!Mess) {
@@ -251,15 +251,16 @@ void IPC::Message_Print(int Task_id, WINDOW* win) {
     int outputLine = 3;
     char buf[256];
 
+    //Reset window from last print
     wclear(win);
     write_window(win, 1, 16, "--- Message Dump Win ---");
-    tcb* ptrTCB = mcb->sched->process_table;//start at head of process table
+
+    tcb* ptrTCB = mcb->sched->process_table;                    //start at head of process table
     while (ptrTCB->task_id != Task_id && ptrTCB->next != NULL) {//search for correct tcb with task id
         ptrTCB = ptrTCB->next;
     }
-    //snprintf(tempStr, sizeof(tempStr), "All messages in queue for task #%d:", Task_id);
-    //write_window(win, outputLine++, 2, tempStr);
 
+    //Output all correct information
     snprintf(buf, sizeof(buf), "Called by thread %d:", Task_id);
     write_window(win, outputLine++, 2, buf);
     write_window(win, outputLine++, 2, "Source-ID   Dest-ID   Message-Content               Size     Type");
@@ -277,15 +278,26 @@ void IPC::Message_Print(int Task_id, WINDOW* win) {
 //###################################################################################################
 void IPC::ipc_Message_Dump(WINDOW* win) {
     int outputLine = 3;
+    char buf[256];
+
+    //Reset window from last dump
+    wclear(win);
+    write_window(win, 1, 16, "--- Message Dump Win ---");
+    write_window(win, outputLine++, 2, "Source-ID   Dest-ID   Message-Content               Size     Type");
+
+    //For each task, if they have any messages, print them
     tcb* ptrTCB = mcb->sched->process_table;
     while (ptrTCB != NULL) {
-        snprintf(tempStr, sizeof(tempStr), "All messages in queue for task #%d:", ptrTCB->task_id);
-        write_window(win, outputLine++, 2, tempStr);
-
         for (int i = ptrTCB->taskMailbox.messageQueue->head; i != ptrTCB->taskMailbox.messageQueue->tail; i = (i + 1) % ptrTCB->taskMailbox.messageQueue->QUEUE_SIZE) {
-            string tempMessage = ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Text;
-            write_window(win, outputLine++, 2, tempMessage.c_str());
+            snprintf(buf, sizeof(buf), "    %d          %d      %s      %d        %d",
+                ptrTCB->taskMailbox.messageQueue->messageQueue[i].Source_Task_Id,
+                ptrTCB->taskMailbox.messageQueue->messageQueue[i].Destination_Task_Id,
+                ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Text,
+                ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Size,
+                ptrTCB->taskMailbox.messageQueue->messageQueue[i].Msg_Type.Message_Type_Id);
+            write_window(win, outputLine++, 2, buf);
         }
+        ptrTCB = ptrTCB->next;
     }
 }
 
@@ -296,5 +308,6 @@ void IPC::ipc_Message_Dump(WINDOW* win) {
 //}
 
 void IPC::setMCB(MCB* mainMCB) {
+    //Gives the ipc object a way to address the mcb
     mcb = mainMCB;
 }

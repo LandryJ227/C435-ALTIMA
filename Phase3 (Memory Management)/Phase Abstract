@@ -1,4 +1,5 @@
 -- ================================================================ Phase #3: Memory Management ==================================================================
-Phase #3 Abstract: 
+Phase #3 Abstract: This phase implements the Memory Management Unit (MMU) that allows tasks to ask for memory, write to memory, and free it when they are done.
+ULTIMA 2.0 is assumed to have access to only 1024 bytes of RAM.
 
 -- ===============================================================================================================================================================

@@ -110,7 +110,7 @@ int mmu::Mem_Left() {
     }
     int totalMem = freeBlocks * BLOCK_SIZE;
 
-    cout << "There are currently " << totalMem << " bytes of memory remaining." << endl;
+    
     return totalMem;
 }
 
@@ -137,23 +137,30 @@ int mmu::Mem_Largest() {
 }
 
 int mmu::Mem_Smallest() {
-    int smallest = 0;
+    int smallest = 8; // assume smallest memory segment is the whole memory
     int free = 0;
     block* current = block0;
 
+    // Search for a free blocks if a free block is found add it to the counter
     while (current != nullptr) {
         if (current->is_free) {
             free++;
         }
+    // If an allocated block is found, check if the amount of free blocks found is less than the current smallest
+    // If it is smaller, reallocate the smallest integer to the amount of free blocks found
         else {
             if (free > 0 && free < smallest) smallest = free;
             free = 0;
         }
+    // Go to the next block
         current = current->nextBlock;
         
     }
+    // Additional check at the end of memory search
     if (free > 0 && free < smallest) smallest = free;
-    if (smallest == 8) { 
+
+    // If the smallest hole is still 8, 
+    if (smallest == 8 && Mem_Left() == 0) { 
         cout << "There are no free blocks available." << endl;
         return 0; // no free blocks
     }
@@ -182,9 +189,11 @@ int main() {
     small = memory.Mem_Smallest();
     int handle3 = memory.Mem_Alloc(800,3);
     int memleft = memory.Mem_Left();
+    cout << "There are currently " << memleft << " bytes available." << endl;
     int handle4 = memory.Mem_Alloc(100,4);
     int handle5 = memory.Mem_Alloc(100,5);
     int memleft2 = memory.Mem_Left();
+    small = memory.Mem_Smallest();
 
     return 1;
 }

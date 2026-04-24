@@ -165,6 +165,22 @@ int mmu::Mem_Smallest() {
 }
 
 
+int mmu::Mem_Dump(int starting_from, int num_bytes) {
+    if (num_bytes + starting_from > mmu::RAM_SIZE ) { //bytes overflow => Adjust num_bytes to runnable.
+        return -1;
+    }
+    for (int i = starting_from; i < starting_from + num_bytes; i++) {
+        if (i % 20 == 0 && i != 0 ) { //every 20 prints -> new line.
+            cout << mmu::mainMem[i] << endl;
+        }
+        else {
+            cout << mmu::mainMem[i];
+        }
+    }
+    return 0;
+}
+
+
 int main() {
     semaphore* memorySema;
     scheduler* sched;
@@ -185,6 +201,12 @@ int main() {
     int handle4 = memory.Mem_Alloc(100,4);
     int handle5 = memory.Mem_Alloc(100,5);
     int memleft2 = memory.Mem_Left();
+    memory.Mem_Dump(0, 129);
 
+    cout<<"freeing"<<endl;
+    int free_success = memory.Mem_Free(handle1);
+    int memleft3 = memory.Mem_Left();
+    memory.Mem_Dump(0, 129);
+    cout<<"bye"<<endl;
     return 1;
 }

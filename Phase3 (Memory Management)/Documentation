@@ -1,0 +1,13 @@
+-- ==================================================================   Documentation   ==============================================================================
+4-20-2026
+First group meeting. We started by reviewing the document together and brainstorming how we are going to implement the MMU.
+We started slow, building the MMU constructor with 1024 bytes and initializing our blocks with 128 bytes each (8 blocks total). We were able to successfully
+get the MMU structure built, initialized filled with '.'.
+
+-- ===================================================================================================================================================================
+
+
+
+-- ===================================================================================================================================================================
+
+

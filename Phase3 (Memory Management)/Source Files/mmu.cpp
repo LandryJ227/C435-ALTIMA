@@ -40,6 +40,15 @@ int mmu::Mem_Alloc(int size) {
 
 }
 
+
+int Mem_Free(int memory_handle) {
+    
+
+
+
+    return -1;
+}
+
 int main() {
     mmu memory(1024, '.', 128);
     cout << memory.block3->handle << endl;

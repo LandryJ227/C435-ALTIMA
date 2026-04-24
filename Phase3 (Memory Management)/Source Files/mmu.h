@@ -6,8 +6,9 @@
 
 class mmu {
 public:
+    static const int RAM_SIZE = 1024;
     static const int BLOCK_SIZE = 128;
-    char mainMem[1024];
+    char mainMem[RAM_SIZE];
     semaphore* memorySema;
     scheduler* sched;
 

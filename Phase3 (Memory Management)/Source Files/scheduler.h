@@ -28,6 +28,7 @@ struct tcb {
     clock_t start_time;
     tcb *next;
     mailbox taskMailbox;
+    int memory_handle = -1; // memory handle for MMU
 };
 
 const string READY = "READY";

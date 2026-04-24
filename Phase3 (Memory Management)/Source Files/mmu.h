@@ -1,10 +1,15 @@
 #ifndef ALTIMA_MMU_H
 #define ALTIMA_MMU_H
+#include "Sema.h"
+#include "scheduler.h"
+#include <ncurses.h>
 
 class mmu {
 public:
     static const int BLOCK_SIZE = 128;
     char mainMem[1024];
+    semaphore* memorySema;
+    scheduler* sched;
 
     class block {
     public:
@@ -33,9 +38,9 @@ public:
     block* block7;
 
 
-    mmu(int size, char default_initial_value, int page_size);//DONE
+    mmu(int size, char default_initial_value, int page_size, semaphore* memSem, scheduler* s);//DONE
     //~mmu();//NOT DONE
-    int Mem_Alloc(int size);//NOT DONE
+    int Mem_Alloc(int size, int task_id);//NOT DONE
     int Mem_Free(int memory_handle);//NOT DONE
     int Mem_Read(int memory_handle, char* ch);//NOT DONE
     int Mem_Write(int memory_handle, char ch);//NOT DONE

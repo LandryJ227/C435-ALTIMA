@@ -4,8 +4,11 @@ using namespace std;
 class mmu;
 class block;
 
-mmu::mmu(int size, char default_initial_value, int page_size) {
+mmu::mmu(int size, char default_initial_value, int page_size, semaphore* memSem, scheduler* s) {
     
+    memorySema = memSem;
+    sched = s;
+
     for (int i=0; i<size; i++) {
         mainMem[i] = default_initial_value;
     }
@@ -31,23 +34,46 @@ mmu::mmu(int size, char default_initial_value, int page_size) {
 int mmu::Mem_Alloc(int size) {
     int numOfBlocksNeeded = size / BLOCK_SIZE;
     if ((size % 128) != 0) numOfBlocksNeeded++;
+
+    memorySema->down(task_id, win, dumpWin);
+
     block* blockPTR = block0;
+    block* startBlock = nullptr;
+    int contiguous = 0;
 
+    while (blockPTR != nullptr) {
+        if (blockPTR->is_free) {
+            if (contiguous == 0)
+                startBlock = blockPTR;
+            contiguous++;
 
+            if (contiguous == numOfBlocksNeeded) {
+                block* alloc = startBlock;
+                for (int i = 0; i < numOfBlocksNeeded; i++) {
+                    alloc->is_free = false;
+                    alloc->task_id = task_id;
+                    alloc->current_position = 0;
+                    alloc = alloc->nextBlock;
+                }
 
+                int handle = startBlock->handle;
 
+                
+                memorySema->up(win, dumpWin);
+                return handle;
+            }
+        }
+        else {
+            startBlock = nullptr;
+            contiguous = 0;
+        }
+        blockPTR = blockPTR->nextBlock
+    }
 
-
-}
-
-
-int Mem_Free(int memory_handle) {
-    
-
-
-
+    memorySema->up(win, dumpWin);
     return -1;
 }
+
 
 int main() {
     mmu memory(1024, '.', 128);

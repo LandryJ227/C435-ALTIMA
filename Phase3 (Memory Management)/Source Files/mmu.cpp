@@ -75,12 +75,24 @@ int mmu::Mem_Alloc(int size) {
 }
 
 int mmu::Mem_Free(int memory_handle) {
+    int block_start;
     block* blockPTR = block0;
-    while (blockPTR != nullptr) {
-        if (blockPTR->memory_handle == memory_handle) {}
+
+    while (blockPTR != nullptr){
+        if (blockPTR->handle == memory_handle) {
+            block_start = blockPTR->start_address;
+            if (blockPTR->is_free) {
+                return -1;
+            }
+            blockPTR->is_free = true;
+            blockPTR->task_id = -1;
+            for (int i = block_start; i-block_start < blockPTR->SIZE && i<mmu::RAM_SIZE; i++) {
+                mmu::mainMem[i] = '#';
+            }
+            return 0;
+        }
+        blockPTR = blockPTR->nextBlock;
     }
-
-
     return -1;
 }
 

@@ -1,11 +1,18 @@
 #ifndef ALTIMA_MMU_H
 #define ALTIMA_MMU_H
+#include ""
 
 
 class mmu {
     class block {
-        char blockOfMem[64];
+        int mem_handle = -1;
         int taskAllocatedTo = -1;
+
+        int starting_from = 0;
+        int num_bytes = 0;
+
+        bool block_free = true;
+        block* next = nullptr;
     };
 
     block mainMem[16];

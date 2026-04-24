@@ -40,7 +40,7 @@ public:
 
     mmu(int size, char default_initial_value, int page_size, semaphore* memSem, scheduler* s);//DONE
     //~mmu();//NOT DONE
-    int Mem_Alloc(int size, int task_id);//NOT DONE
+    int Mem_Alloc(int size, int task_id);
     int Mem_Free(int memory_handle);//NOT DONE
     int Mem_Read(int memory_handle, char* ch);//NOT DONE
     int Mem_Write(int memory_handle, char ch);//NOT DONE

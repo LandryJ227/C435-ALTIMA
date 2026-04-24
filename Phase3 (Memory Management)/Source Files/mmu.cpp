@@ -1,11 +1,12 @@
 #include "mmu.h"
 #include <iostream>
+
 using namespace std;
 class mmu;
 class block;
 
 mmu::mmu(int size, char default_initial_value, int page_size) {
-    
+
     for (int i=0; i<size; i++) {
         mainMem[i] = default_initial_value;
     }
@@ -42,7 +43,7 @@ int mmu::Mem_Alloc(int size) {
 
 
 int Mem_Free(int memory_handle) {
-    
+
 
 
 

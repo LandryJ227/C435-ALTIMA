@@ -45,9 +45,9 @@ public:
     int Mem_Free(int memory_handle);//DONE
     int Mem_Read(int memory_handle, char* ch);//DONE
     int Mem_Write(int memory_handle, char ch);//DONE
-    int Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *text);//NOT DONE
-    int Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *text);//NOT DONE
-    int Mem_Left();//NOT DONE
+    int Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *text);//DONE
+    int Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *text);//DONE
+    int Mem_Left();//Julio
     int Mem_Largest();//Julio
     int Mem_Smallest();//Julio
     int Mem_Coalesce();//NOT DONE

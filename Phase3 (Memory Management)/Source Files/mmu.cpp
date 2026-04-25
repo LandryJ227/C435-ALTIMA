@@ -233,6 +233,59 @@ int mmu::Mem_Write(int memory_handle, char ch) {
     return -1;
 }
 
+int mmu::Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *text) {
+    block* current_block = block0;
+
+    while (current_block != nullptr) {//Search for collect block
+        if (current_block->handle == memory_handle) { //In the correct block
+            int block_lb = offset_from_beg;
+            int block_ub = offset_from_beg + text_size; //we will read only the text_size amount.
+            int mem_lb = block_lb + current_block->start_address;
+            int mem_ub = block_ub + current_block->start_address;
+
+            if (current_block->is_free) return -1; //Don't Read From Free Block
+
+            if ((block_ub <= mmu::BLOCK_SIZE && block_lb >= 0)
+                && (mem_ub <= mmu::RAM_SIZE && mem_lb >= 0)) {
+                for (int i = 0; i < text_size; i++) {
+                    text[i] = mainMem[mem_lb + i];
+                }
+                return 0;
+            }
+            else return -1;
+        }
+        current_block = current_block->nextBlock;
+    }
+    return -1;
+}
+
+int mmu::Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *text) {
+    block* current_block = block0;
+
+    while (current_block != nullptr) {//Search for collect block
+        if (current_block->handle == memory_handle) { //In the correct block
+            int block_lb = offset_from_beg;
+            int block_ub = offset_from_beg + text_size; //we will write only the text_size amount.
+            int mem_lb = block_lb + current_block->start_address;
+            int mem_ub = block_ub + current_block->start_address;
+
+            if (current_block->is_free) return -1; //Don't write to Free Block
+
+            if ((block_ub <= mmu::BLOCK_SIZE && block_lb >= 0)
+                && (mem_ub <= mmu::RAM_SIZE && mem_lb >= 0)) {
+                for (int i = 0; i < text_size; i++) {
+                    mainMem[mem_lb + i] = text[i];
+                }
+                return 0;
+                }
+            else return -1;
+        }
+        current_block = current_block->nextBlock;
+    }
+    return -1;
+}
+
+
 int main() {
     semaphore* memorySema;
     scheduler* sched;
@@ -257,19 +310,26 @@ int main() {
     memory.Mem_Dump(0, 129);
     small = memory.Mem_Smallest();
 
+    //### Writing to Block 1
+
+
+    //#### Reading from Block 1 #####
     cout<<endl << "reading" <<endl;
     char read;
     char* read_ptr = &read;
     memory.Mem_Read(handle1, read_ptr);
     cout << read << endl;
 
+    //### Freeing block 1
     cout<<"freeing"<<endl;
     int free_success = memory.Mem_Free(handle1);
     int memleft3 = memory.Mem_Left();
     memory.Mem_Dump(0, 129);
     cout<<endl << "reading" <<endl;
 
-    memory.Mem_Read(handle1, read_ptr);
+    if  (memory.Mem_Read(handle1, read_ptr) == -1) {
+        cout << "Error Reading" <<endl;
+    }
     cout << read << endl;
     cout<<"bye"<<endl;
     return 1;

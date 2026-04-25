@@ -40,7 +40,7 @@ public:
 
 
     mmu(int size, char default_initial_value, int page_size, semaphore* memSem, scheduler* s);//DONE
-    //~mmu();//NOT DONE
+    //~mmu();//DONE
     int Mem_Alloc(int size, int task_id);//DONE
     int Mem_Free(int memory_handle);//DONE
     int Mem_Read(int memory_handle, char* ch);//DONE
@@ -50,7 +50,7 @@ public:
     int Mem_Left();//Julio
     int Mem_Largest();//Julio
     int Mem_Smallest();//Julio
-    int Mem_Coalesce();//NOT DONE
+    int Mem_Coalesce();//DONE
     int Mem_Dump(int starting_from, int num_bytes);//DONE
 };
 

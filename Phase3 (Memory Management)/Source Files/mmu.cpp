@@ -284,7 +284,22 @@ int mmu::Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *
     }
     return -1;
 }
-
+int mmu::Mem_Coalesce() { //Since we used fixed block sizes coalesce loses the combining.
+    block* current_block = block0;
+    bool found = false;
+    while (current_block != nullptr) {
+        if (current_block->is_free) {
+            int block_index = current_block->start_address;
+            found = true;
+            for (int i = block_index; i < mmu::BLOCK_SIZE + block_index && i < mmu::RAM_SIZE; i++) {
+                mainMem[i]  = '.';
+            }
+        }
+        current_block = current_block->nextBlock;
+    }
+    if (!found) return -1;
+    return 0;
+}
 
 int main() {
     semaphore* memorySema;
@@ -311,6 +326,28 @@ int main() {
     small = memory.Mem_Smallest();
 
     //### Writing to Block 1
+    cout << "Writing to current positon in block 3" << endl;
+    const int text_size = 13;
+    char text[text_size] = "Hello ultima";
+    char writer;
+    char *p = &writer;
+    for (int i = 0 ; i < text_size ; i++) {
+        writer = text[i];
+        memory.Mem_Write(handle4, *p);
+    }
+    writer = 'h';
+    memory.Mem_Write(handle5, *p);
+    writer = 'e';
+    if (memory.Mem_Write(handle5, *p)) cout<<"error"<<endl;
+    writer = 'l';
+    memory.Mem_Write(handle5, *p);
+    writer = 'l';
+    memory.Mem_Write(handle5, *p);
+    writer = '0';
+    memory.Mem_Write(handle5, *p);
+    cout << "Reading from block 3" << endl;
+    memory.Mem_Read(handle5, 0, text_size, text);
+    memory.Mem_Dump(0,1023);
 
 
     //#### Reading from Block 1 #####
@@ -331,6 +368,7 @@ int main() {
         cout << "Error Reading" <<endl;
     }
     cout << read << endl;
+
     cout<<"bye"<<endl;
     return 1;
 }

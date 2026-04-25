@@ -41,13 +41,13 @@ public:
 
     mmu(int size, char default_initial_value, int page_size, semaphore* memSem, scheduler* s);//DONE
     //~mmu();//DONE
-    int Mem_Alloc(int size, int task_id);//DONE
-    int Mem_Free(int memory_handle);//DONE
-    int Mem_Read(int memory_handle, char* ch);//NOT DONE
-    int Mem_Write(int memory_handle, char ch);//NOT DONE
-    int Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *text); // Julio
-    int Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *text);//NOT DONE
-    int Mem_Left();//NOT DONE
+    int Mem_Alloc(int size, int task_id);//Julio
+    int Mem_Free(int memory_handle);//Ryan
+    int Mem_Read(int memory_handle, char* ch);//Ryan
+    int Mem_Write(int memory_handle, char ch);//Ryan
+    int Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *text); // Ryan
+    int Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *text);// Ryan
+    int Mem_Left();//Julio
     int Mem_Largest();//Julio
     int Mem_Smallest();//Julio
     int Mem_Coalesce();//DONE

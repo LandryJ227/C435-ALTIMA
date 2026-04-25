@@ -5,6 +5,8 @@ class block;
 
 mmu::mmu(int size, char default_initial_value, int page_size, semaphore* memSem, scheduler* s) {
     
+    // Authors: Julio and Jacob
+
     memorySema = memSem;
     sched = s;
 
@@ -31,6 +33,8 @@ mmu::mmu(int size, char default_initial_value, int page_size, semaphore* memSem,
 }
 
 int mmu::Mem_Alloc(int size, int task_id) {
+    // Author: Julio
+
     int numOfBlocksNeeded = size / BLOCK_SIZE;
     if ((size % 128) != 0) numOfBlocksNeeded++;
 
@@ -79,6 +83,7 @@ int mmu::Mem_Alloc(int size, int task_id) {
 }
 
 int mmu::Mem_Free(int memory_handle) {
+    // Author: Ryan
     int block_start;
     block* blockPTR = block0;
 
@@ -101,13 +106,18 @@ int mmu::Mem_Free(int memory_handle) {
 }
 
 int mmu::Mem_Left() {
-    int freeBlocks = 0;
-    block* current = block0;
+    // Author: Julio
 
+    int freeBlocks = 0;
+    block* current = block0;    // Block pointer to traverse memory blocks from the beginning
+
+    // Search for a free block. If a free block is found add it to the counter,
     while (current != nullptr) {
         if (current->is_free) freeBlocks++;
         current = current->nextBlock;
     }
+    
+    // Multiply amount of free blocks found by the block size to convert to byte size
     int totalMem = freeBlocks * BLOCK_SIZE;
 
     
@@ -115,21 +125,29 @@ int mmu::Mem_Left() {
 }
 
 int mmu::Mem_Largest() {
+    // Author: Julio
+
     int largest = 0;
     int free = 0;
-    block* current = block0;
+    block* current = block0;    // Block pointer to traverse memory blocks from the beginning
 
+
+    // Search for a free block. If a free block is found add it to the counter, 
     while (current != nullptr) {
         if (current->is_free) {
             free++;
             if (free > largest) largest = free;
         }
+    // If allocated block is found, reset the current free block counter to 0 and keep searching for next free blocks
         else {
             free = 0;
         }
+    // Go to the next block
         current = current->nextBlock;
         
     }
+
+    // Convert block count to byte size and print result
     int sizeLargest = largest * BLOCK_SIZE;
     cout << "The largest available memory segment is " << sizeLargest << " bytes" << endl;
     return largest;
@@ -137,6 +155,8 @@ int mmu::Mem_Largest() {
 }
 
 int mmu::Mem_Smallest() {
+    // Author: Julio
+
     int smallest = 8; // assume smallest memory segment is the whole memory
     int free = 0;
     block* current = block0;
@@ -173,6 +193,7 @@ int mmu::Mem_Smallest() {
 
 
 int mmu::Mem_Dump(int starting_from, int num_bytes) {
+    // Author: Ryan
     if (num_bytes + starting_from > mmu::RAM_SIZE ) { //bytes overflow => Adjust num_bytes to runnable.
         return -1;
     }
@@ -188,6 +209,8 @@ int mmu::Mem_Dump(int starting_from, int num_bytes) {
 }
 
 int mmu::Mem_Read(int memory_handle, char* ch) {
+    // Author: Ryan
+
     block* current_block = block0;
 
     while (current_block != nullptr) {
@@ -211,6 +234,7 @@ int mmu::Mem_Read(int memory_handle, char* ch) {
 }
 
 int mmu::Mem_Write(int memory_handle, char ch) {
+    // Author: Ryan
     block* current_block = block0;
 
     while (current_block != nullptr) {
@@ -234,6 +258,8 @@ int mmu::Mem_Write(int memory_handle, char ch) {
 }
 
 int mmu::Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *text) {
+    // Author: Ryan
+
     block* current_block = block0;
 
     while (current_block != nullptr) {//Search for collect block
@@ -260,6 +286,8 @@ int mmu::Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *t
 }
 
 int mmu::Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *text) {
+    // Author: Ryan
+
     block* current_block = block0;
 
     while (current_block != nullptr) {//Search for collect block
@@ -285,6 +313,7 @@ int mmu::Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *
     return -1;
 }
 int mmu::Mem_Coalesce() { //Since we used fixed block sizes coalesce loses the combining.
+        // Author: Ryan
     block* current_block = block0;
     bool found = false;
     while (current_block != nullptr) {
@@ -302,6 +331,8 @@ int mmu::Mem_Coalesce() { //Since we used fixed block sizes coalesce loses the c
 }
 
 int main() {
+        // Authors: Julio, Ryan, and Jacob
+
     semaphore* memorySema;
     scheduler* sched;
     mmu memory(1024, '.', 128, memorySema, sched);

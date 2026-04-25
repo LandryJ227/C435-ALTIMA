@@ -325,6 +325,15 @@ int main() {
     memory.Mem_Dump(0, 129);
     small = memory.Mem_Smallest();
 
+    //### Freeing block 1
+    cout<<"freeing"<<endl;
+    int free_success = memory.Mem_Free(handle1);
+    int memleft3 = memory.Mem_Left();
+    memory.Mem_Dump(0, 129);
+    cout<<endl << "reading" <<endl;
+
+    memory.Mem_Coalesce();
+
     //### Writing to Block 1
     cout << "Writing to current positon in block 3" << endl;
     const int text_size = 13;
@@ -354,15 +363,10 @@ int main() {
     cout<<endl << "reading" <<endl;
     char read;
     char* read_ptr = &read;
-    memory.Mem_Read(handle1, read_ptr);
+    memory.Mem_Read(handle5, read_ptr);
     cout << read << endl;
 
-    //### Freeing block 1
-    cout<<"freeing"<<endl;
-    int free_success = memory.Mem_Free(handle1);
-    int memleft3 = memory.Mem_Left();
-    memory.Mem_Dump(0, 129);
-    cout<<endl << "reading" <<endl;
+
 
     if  (memory.Mem_Read(handle1, read_ptr) == -1) {
         cout << "Error Reading" <<endl;

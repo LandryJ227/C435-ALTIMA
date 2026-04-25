@@ -177,7 +177,7 @@ int mmu::Mem_Dump(int starting_from, int num_bytes) {
         return -1;
     }
     for (int i = starting_from; i < starting_from + num_bytes; i++) {
-        if (i % 20 == 0 && i != 0 ) { //every 20 prints -> new line.
+        if (i % 20 == 0 && i != 0 ) { //every 20 prints -> new line. can change to whatever.
             cout << mmu::mainMem[i] << endl;
         }
         else {
@@ -187,6 +187,29 @@ int mmu::Mem_Dump(int starting_from, int num_bytes) {
     return 0;
 }
 
+
+int mmu::Mem_Read(int memory_handle, char* ch) {
+    block* current_block = block0;
+
+    while (current_block != nullptr) {
+        if (current_block->handle == memory_handle) {
+            int block_position = current_block->current_position;
+            int mem_index = current_block->start_address + block_position;
+
+            if (current_block->is_free) return -1; //Don't Read From Free Block
+
+            if ((block_position < mmu::BLOCK_SIZE && block_position >= 0) &&//In block bounds
+                (mem_index < mmu::RAM_SIZE && mem_index >= 0)){ //In mem bounds
+                *ch = mainMem[mem_index];
+                current_block->current_position++;
+                return 0;
+            }
+            else return -1;
+        }
+        current_block = current_block->nextBlock;
+    }
+    return -1;
+}
 
 int main() {
     semaphore* memorySema;

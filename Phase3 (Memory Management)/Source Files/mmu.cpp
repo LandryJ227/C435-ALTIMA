@@ -187,7 +187,6 @@ int mmu::Mem_Dump(int starting_from, int num_bytes) {
     return 0;
 }
 
-
 int mmu::Mem_Read(int memory_handle, char* ch) {
     block* current_block = block0;
 
@@ -200,10 +199,33 @@ int mmu::Mem_Read(int memory_handle, char* ch) {
 
             if ((block_position < mmu::BLOCK_SIZE && block_position >= 0) &&//In block bounds
                 (mem_index < mmu::RAM_SIZE && mem_index >= 0)){ //In mem bounds
-                *ch = mainMem[mem_index];
-                current_block->current_position++;
-                return 0;
+                    *ch = mainMem[mem_index];
+                    current_block->current_position++;
+                    return 0;
             }
+            else return -1;
+        }
+        current_block = current_block->nextBlock;
+    }
+    return -1;
+}
+
+int mmu::Mem_Write(int memory_handle, char ch) {
+    block* current_block = block0;
+
+    while (current_block != nullptr) {
+        if (current_block->handle == memory_handle) {
+            int block_position = current_block->current_position;
+            int mem_index = current_block->start_address + block_position;
+
+            if (current_block->is_free) return -1; //Don't write to Free Block!
+
+            if ((block_position < mmu::BLOCK_SIZE && block_position >= 0) &&//In block bounds
+                (mem_index < mmu::RAM_SIZE && mem_index >= 0)){ //In mem bounds
+                    mainMem[mem_index] = ch;
+                    current_block->current_position++;
+                    return 0;
+                }
             else return -1;
         }
         current_block = current_block->nextBlock;
@@ -235,10 +257,20 @@ int main() {
     memory.Mem_Dump(0, 129);
     small = memory.Mem_Smallest();
 
+    cout<<endl << "reading" <<endl;
+    char read;
+    char* read_ptr = &read;
+    memory.Mem_Read(handle1, read_ptr);
+    cout << read << endl;
+
     cout<<"freeing"<<endl;
     int free_success = memory.Mem_Free(handle1);
     int memleft3 = memory.Mem_Left();
     memory.Mem_Dump(0, 129);
+    cout<<endl << "reading" <<endl;
+
+    memory.Mem_Read(handle1, read_ptr);
+    cout << read << endl;
     cout<<"bye"<<endl;
     return 1;
 }

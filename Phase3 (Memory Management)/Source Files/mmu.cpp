@@ -177,7 +177,7 @@ int mmu::Mem_Dump(int starting_from, int num_bytes) {
         return -1;
     }
     for (int i = starting_from; i < starting_from + num_bytes; i++) {
-        if (i % 20 == 0 && i != 0 ) { //every 20 prints -> new line.
+        if (i % 20 == 0 && i != 0 ) { //every 20 prints -> new line. can change to whatever.
             cout << mmu::mainMem[i] << endl;
         }
         else {
@@ -187,6 +187,119 @@ int mmu::Mem_Dump(int starting_from, int num_bytes) {
     return 0;
 }
 
+int mmu::Mem_Read(int memory_handle, char* ch) {
+    block* current_block = block0;
+
+    while (current_block != nullptr) {
+        if (current_block->handle == memory_handle) {
+            int block_position = current_block->current_position;
+            int mem_index = current_block->start_address + block_position;
+
+            if (current_block->is_free) return -1; //Don't Read From Free Block
+
+            if ((block_position < mmu::BLOCK_SIZE && block_position >= 0) &&//In block bounds
+                (mem_index < mmu::RAM_SIZE && mem_index >= 0)){ //In mem bounds
+                    *ch = mainMem[mem_index];
+                    current_block->current_position++;
+                    return 0;
+            }
+            else return -1;
+        }
+        current_block = current_block->nextBlock;
+    }
+    return -1;
+}
+
+int mmu::Mem_Write(int memory_handle, char ch) {
+    block* current_block = block0;
+
+    while (current_block != nullptr) {
+        if (current_block->handle == memory_handle) {
+            int block_position = current_block->current_position;
+            int mem_index = current_block->start_address + block_position;
+
+            if (current_block->is_free) return -1; //Don't write to Free Block!
+
+            if ((block_position < mmu::BLOCK_SIZE && block_position >= 0) &&//In block bounds
+                (mem_index < mmu::RAM_SIZE && mem_index >= 0)){ //In mem bounds
+                    mainMem[mem_index] = ch;
+                    current_block->current_position++;
+                    return 0;
+                }
+            else return -1;
+        }
+        current_block = current_block->nextBlock;
+    }
+    return -1;
+}
+
+int mmu::Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *text) {
+    block* current_block = block0;
+
+    while (current_block != nullptr) {//Search for collect block
+        if (current_block->handle == memory_handle) { //In the correct block
+            int block_lb = offset_from_beg;
+            int block_ub = offset_from_beg + text_size; //we will read only the text_size amount.
+            int mem_lb = block_lb + current_block->start_address;
+            int mem_ub = block_ub + current_block->start_address;
+
+            if (current_block->is_free) return -1; //Don't Read From Free Block
+
+            if ((block_ub <= mmu::BLOCK_SIZE && block_lb >= 0)
+                && (mem_ub <= mmu::RAM_SIZE && mem_lb >= 0)) {
+                for (int i = 0; i < text_size; i++) {
+                    text[i] = mainMem[mem_lb + i];
+                }
+                return 0;
+            }
+            else return -1;
+        }
+        current_block = current_block->nextBlock;
+    }
+    return -1;
+}
+
+int mmu::Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *text) {
+    block* current_block = block0;
+
+    while (current_block != nullptr) {//Search for collect block
+        if (current_block->handle == memory_handle) { //In the correct block
+            int block_lb = offset_from_beg;
+            int block_ub = offset_from_beg + text_size; //we will write only the text_size amount.
+            int mem_lb = block_lb + current_block->start_address;
+            int mem_ub = block_ub + current_block->start_address;
+
+            if (current_block->is_free) return -1; //Don't write to Free Block
+
+            if ((block_ub <= mmu::BLOCK_SIZE && block_lb >= 0)
+                && (mem_ub <= mmu::RAM_SIZE && mem_lb >= 0)) {
+                for (int i = 0; i < text_size; i++) {
+                    mainMem[mem_lb + i] = text[i];
+                }
+                return 0;
+                }
+            else return -1;
+        }
+        current_block = current_block->nextBlock;
+    }
+    return -1;
+}
+int mmu::Mem_Coalesce() { //Since we used fixed block sizes coalesce loses the combining.
+    block* current_block = block0;
+    bool found = false;
+    while (current_block != nullptr) {
+        if (current_block->is_free) {
+            int block_index = current_block->start_address;
+            found = true;
+            for (int i = block_index; i < mmu::BLOCK_SIZE + block_index && i < mmu::RAM_SIZE; i++) {
+                mainMem[i]  = '.';
+            }
+        }
+        current_block = current_block->nextBlock;
+    }
+    if (!found) return -1;
+    return 0;
+}
 
 int main() {
     semaphore* memorySema;
@@ -212,10 +325,54 @@ int main() {
     memory.Mem_Dump(0, 129);
     small = memory.Mem_Smallest();
 
+    //### Freeing block 1
     cout<<"freeing"<<endl;
     int free_success = memory.Mem_Free(handle1);
     int memleft3 = memory.Mem_Left();
     memory.Mem_Dump(0, 129);
+    cout<<endl << "reading" <<endl;
+
+    memory.Mem_Coalesce();
+
+    //### Writing to Block 1
+    cout << "Writing to current positon in block 3" << endl;
+    const int text_size = 13;
+    char text[text_size] = "Hello ultima";
+    char writer;
+    char *p = &writer;
+    for (int i = 0 ; i < text_size ; i++) {
+        writer = text[i];
+        memory.Mem_Write(handle4, *p);
+    }
+    writer = 'h';
+    memory.Mem_Write(handle5, *p);
+    writer = 'e';
+    if (memory.Mem_Write(handle5, *p)) cout<<"error"<<endl;
+    writer = 'l';
+    memory.Mem_Write(handle5, *p);
+    writer = 'l';
+    memory.Mem_Write(handle5, *p);
+    writer = '0';
+    memory.Mem_Write(handle5, *p);
+    cout << "Reading from block 3" << endl;
+    memory.Mem_Read(handle5, 0, text_size, text);
+    memory.Mem_Dump(0,1023);
+
+
+    //#### Reading from Block 1 #####
+    cout<<endl << "reading" <<endl;
+    char read;
+    char* read_ptr = &read;
+    memory.Mem_Read(handle5, read_ptr);
+    cout << read << endl;
+
+
+
+    if  (memory.Mem_Read(handle1, read_ptr) == -1) {
+        cout << "Error Reading" <<endl;
+    }
+    cout << read << endl;
+
     cout<<"bye"<<endl;
     return 1;
 }

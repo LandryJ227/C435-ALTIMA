@@ -264,14 +264,23 @@ int mmu::Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *t
 
     while (current_block != nullptr) {//Search for collect block
         if (current_block->handle == memory_handle) { //In the correct block
+            if (current_block->is_free) return -1; //Don't read to Free Block
+            block* start_block = current_block; //tracking beginning block
+            block* travel_block = start_block->nextBlock; //searching for same handle blocks
+            int block_set_size = 1;
+
+            while (travel_block != nullptr && start_block->handle == travel_block->handle) {
+                if (travel_block->is_free) return -1;
+                block_set_size++;
+                travel_block = travel_block->nextBlock;
+            }
+
             int block_lb = offset_from_beg;
             int block_ub = offset_from_beg + text_size; //we will read only the text_size amount.
-            int mem_lb = block_lb + current_block->start_address;
-            int mem_ub = block_ub + current_block->start_address;
+            int mem_lb = block_lb + start_block->start_address;
+            int mem_ub = block_ub + start_block->start_address;
 
-            if (current_block->is_free) return -1; //Don't Read From Free Block
-
-            if ((block_ub <= mmu::BLOCK_SIZE && block_lb >= 0)
+            if ((block_ub <= mmu::BLOCK_SIZE * block_set_size && block_lb >= 0)
                 && (mem_ub <= mmu::RAM_SIZE && mem_lb >= 0)) {
                 for (int i = 0; i < text_size; i++) {
                     text[i] = mainMem[mem_lb + i];
@@ -292,14 +301,25 @@ int mmu::Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *
 
     while (current_block != nullptr) {//Search for collect block
         if (current_block->handle == memory_handle) { //In the correct block
+            if (current_block->is_free) return -1; //Don't write to Free Block
+            block* start_block = current_block; //tracking beginning block
+            block* travel_block = start_block->nextBlock; //searching for same handle blocks
+            int block_set_size = 1;
+
+            while (travel_block != nullptr && start_block->handle == travel_block->handle) {
+                if (travel_block->is_free) return -1;
+                block_set_size++;
+                travel_block = travel_block->nextBlock;
+            }
+
             int block_lb = offset_from_beg;
             int block_ub = offset_from_beg + text_size; //we will write only the text_size amount.
-            int mem_lb = block_lb + current_block->start_address;
-            int mem_ub = block_ub + current_block->start_address;
+            int mem_lb = block_lb + start_block->start_address;
+            int mem_ub = block_ub + start_block->start_address;
 
-            if (current_block->is_free) return -1; //Don't write to Free Block
 
-            if ((block_ub <= mmu::BLOCK_SIZE && block_lb >= 0)
+
+            if ((block_ub <= mmu::BLOCK_SIZE * block_set_size && block_lb >= 0)
                 && (mem_ub <= mmu::RAM_SIZE && mem_lb >= 0)) {
                 for (int i = 0; i < text_size; i++) {
                     mainMem[mem_lb + i] = text[i];
@@ -366,7 +386,7 @@ int main() {
     memory.Mem_Coalesce();
 
     //### Writing to Block 1
-    cout << "Writing to current positon in block 3" << endl;
+    cout << "Writing to current positon in handle 4" << endl;
     const int text_size = 13;
     char text[text_size] = "Hello ultima";
     char writer;
@@ -383,12 +403,17 @@ int main() {
     memory.Mem_Write(handle5, *p);
     writer = 'l';
     memory.Mem_Write(handle5, *p);
-    writer = '0';
+    writer = 'o';
     memory.Mem_Write(handle5, *p);
-    cout << "Reading from block 3" << endl;
-    memory.Mem_Read(handle5, 0, text_size, text);
-    memory.Mem_Dump(0,1023);
-
+    cout << "Reading from handle 5" << endl;
+    char text_new[128];
+    if (memory.Mem_Read(handle5, 0, 127, text_new)==-1) {
+        cout<<"Read error" << endl;
+    }
+    else {
+        cout<<text_new<<endl;
+    }
+    //memory.Mem_Dump(0,1023);
 
     //#### Reading from Block 1 #####
     cout<<endl << "reading" <<endl;

@@ -56,6 +56,7 @@ int mmu::Mem_Alloc(int size, int task_id) {
                     alloc->is_free = false;
                     alloc->task_id = task_id;
                     alloc->current_position = 0;
+                    alloc->handle = startBlock->handle;
                     alloc = alloc->nextBlock;
                 }
 
@@ -259,6 +260,7 @@ int mmu::Mem_Write(int memory_handle, char ch) {
 
 int mmu::Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *text) {
     // Author: Ryan
+    if (text_size < 0 || text == nullptr) return -1;
 
     block* current_block = block0;
 
@@ -296,6 +298,7 @@ int mmu::Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *t
 
 int mmu::Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *text) {
     // Author: Ryan
+    if (text_size < 0 || text == nullptr) return -1;
 
     block* current_block = block0;
 
@@ -376,12 +379,6 @@ int main() {
     memory.Mem_Dump(0, 129);
     small = memory.Mem_Smallest();
 
-    //### Freeing block 1
-    cout<<"freeing"<<endl;
-    int free_success = memory.Mem_Free(handle1);
-    int memleft3 = memory.Mem_Left();
-    memory.Mem_Dump(0, 129);
-    cout<<endl << "reading" <<endl;
 
     memory.Mem_Coalesce();
 
@@ -391,43 +388,37 @@ int main() {
     char text[text_size] = "Hello ultima";
     char writer;
     char *p = &writer;
-    for (int i = 0 ; i < text_size ; i++) {
-        writer = text[i];
-        memory.Mem_Write(handle4, *p);
-    }
+    if (memory.Mem_Write(handle1, 200, text_size,text) ==-1) cout<<"Write error" <<endl;
     writer = 'h';
-    memory.Mem_Write(handle5, *p);
+    memory.Mem_Write(handle1, *p);
     writer = 'e';
-    if (memory.Mem_Write(handle5, *p)) cout<<"error"<<endl;
+    if (memory.Mem_Write(handle1, *p)==-1) cout<<"error"<<endl;
     writer = 'l';
-    memory.Mem_Write(handle5, *p);
+    memory.Mem_Write(handle1, *p);
     writer = 'l';
-    memory.Mem_Write(handle5, *p);
+    memory.Mem_Write(handle1, *p);
     writer = 'o';
-    memory.Mem_Write(handle5, *p);
+    memory.Mem_Write(handle1, *p);
     cout << "Reading from handle 5" << endl;
+    char text_big[400];
     char text_new[128];
-    if (memory.Mem_Read(handle5, 0, 127, text_new)==-1) {
-        cout<<"Read error" << endl;
+    if (memory.Mem_Read(handle1, 0, 350, text_big)==-1) {
+        cout<<"Read error !!" << endl;
     }
     else {
-        cout<<text_new<<endl;
+        cout<<text_big<<endl;
     }
-    //memory.Mem_Dump(0,1023);
+    memory.Mem_Dump(0,1023);
 
-    //#### Reading from Block 1 #####
+    //### Freeing block 1
+    cout<<"freeing"<<endl;
+    int free_success = memory.Mem_Free(handle1);
+    int memleft3 = memory.Mem_Left();
+    memory.Mem_Dump(0, 129);
     cout<<endl << "reading" <<endl;
-    char read;
-    char* read_ptr = &read;
-    memory.Mem_Read(handle5, read_ptr);
-    cout << read << endl;
 
 
 
-    if  (memory.Mem_Read(handle1, read_ptr) == -1) {
-        cout << "Error Reading" <<endl;
-    }
-    cout << read << endl;
 
     cout<<"bye"<<endl;
     return 1;

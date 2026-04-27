@@ -32,5 +32,6 @@ After Phase 2:
 
 After Phase 3:
   Our ULTIMA Project now has memory management, IPC messaging, a Scheduler, and semaphores for resource managing. There is now an additional window 
-  that shows what our MMU is doing. We are able to successfully allocate, write, read, and free memory with our MMU. Our project is also able to 
+  that shows what our MMU is doing, what is currently in Memory, which Tasks are allocated to which blocks, and which blocks are free.
+  We are able to successfully allocate, write, read, and free memory with our MMU. Our project is also able to 
   detect if there is not enough RAM for a task, which will cause it to not be allocated until enough memory is available for it. 

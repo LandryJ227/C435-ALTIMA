@@ -5,8 +5,10 @@ We started slow, building the MMU constructor with 1024 bytes and initializing o
 get the MMU structure built, initialized filled with '.'.
 
 -- ===================================================================================================================================================================
-
-
+4-24-2026
+Second group meeting. We continued working on the Mem_Alloc(), Mem_Read(), etc. We have a working sample that can allocate memory, see how much RAM is left,
+see the longest segment of free memory, and see the shortest segment of free memory. We still have to get it working with our scheduler/semaphore and windows, but
+the functionality of the MMU is mostly complete aside from the write and read functions. We will continue working on the project individually/through text.
 
 -- ===================================================================================================================================================================
 

@@ -1,5 +1,7 @@
 -- ================================================================ Phase #3: Memory Management ==================================================================
 Phase #3 Abstract: This phase implements the Memory Management Unit (MMU) that allows tasks to ask for memory, write to memory, and free it when they are done.
-ULTIMA 2.0 is assumed to have access to only 1024 bytes of RAM.
+ULTIMA 2.0 is assumed to have access to only 1024 bytes of RAM. We decided to implement a page size of 128 bytes, leading to a total of 8 blocks in our RAM.
+When memory is first allocated, the entire 1024 chars are initialized as dots ("."). If a task of 129 bytes is requested (block_size + 1), the MMU will allocate
+2 blocks for the task. When memory is freed, the character will be replaced with a "#".
 
 -- ===============================================================================================================================================================

@@ -29,3 +29,8 @@ After Phase 2:
 
   The Message Dump Window shows all the messages that are passed from thread to thread.
 ===================================================================================================================================================== |
+
+After Phase 3:
+  Our ULTIMA Project now has memory management, IPC messaging, a Scheduler, and semaphores for resource managing. There is now an additional window 
+  that shows what our MMU is doing. We are able to successfully allocate, write, read, and free memory with our MMU. Our project is also able to 
+  detect if there is not enough RAM for a task, which will cause it to not be allocated until enough memory is available for it. 

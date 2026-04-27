@@ -52,6 +52,7 @@ int main() {
     thread0Win = create_window(14, 55, 14, 57);
     thread1Win = create_window(16, 55, 28, 57);
     thread2Win = create_window(15, 55, 44, 57);
+    memoryWin = create_window(58, 46, 1, 185);
 
     //------------------- LABEL WINDOWS -------------------
     write_window(outputWin, 1,17, "--- Output Window ---");
@@ -62,6 +63,64 @@ int main() {
     write_window(thread1Win, 1, 15, "--- Thread 1 Win ---");
     write_window(thread2Win, 1, 15, "--- Thread 2 Win ---");
     write_window(threadWin, 1, 15, "--- Shared Win ---");
+    write_window(memoryWin, 1, 1, "Memory");
+    //---------------------Start Memory---------------------
+    write_window(memoryWin, 2, 1, "----- Block1 -----");
+    for (int i=3; i<=6; i++) {
+        write_window(memoryWin, i, 2, "........");
+        write_window(memoryWin, i, 13, "........");
+        write_window(memoryWin, i, 24, "........");
+        write_window(memoryWin, i, 35, "........");
+    }
+    write_window(memoryWin, 8, 1, "----- Block2 -----");
+    for (int i=9; i<=12; i++) {
+        write_window(memoryWin, i, 2, "........");
+        write_window(memoryWin, i, 13, "........");
+        write_window(memoryWin, i, 24, "........");
+        write_window(memoryWin, i, 35, "........");
+    }
+    write_window(memoryWin, 14, 1, "----- Block3 -----");
+    for (int i=15; i<=18; i++) {
+        write_window(memoryWin, i, 2, "........");
+        write_window(memoryWin, i, 13, "........");
+        write_window(memoryWin, i, 24, "........");
+        write_window(memoryWin, i, 35, "........");
+    }
+    write_window(memoryWin, 20, 1, "----- Block4 -----");
+    for (int i=21; i<=24; i++) {
+        write_window(memoryWin, i, 2, "........");
+        write_window(memoryWin, i, 13, "........");
+        write_window(memoryWin, i, 24, "........");
+        write_window(memoryWin, i, 35, "........");
+    }
+    write_window(memoryWin, 26, 1, "----- Block5 -----");
+    for (int i=27; i<=30; i++) {
+        write_window(memoryWin, i, 2, "........");
+        write_window(memoryWin, i, 13, "........");
+        write_window(memoryWin, i, 24, "........");
+        write_window(memoryWin, i, 35, "........");
+    }
+    write_window(memoryWin, 32, 1, "----- Block6 -----");
+    for (int i=33; i<=36; i++) {
+        write_window(memoryWin, i, 2, "........");
+        write_window(memoryWin, i, 13, "........");
+        write_window(memoryWin, i, 24, "........");
+        write_window(memoryWin, i, 35, "........");
+    }
+    write_window(memoryWin, 38, 1, "----- Block7 -----");
+    for (int i=39; i<=42; i++) {
+        write_window(memoryWin, i, 2, "........");
+        write_window(memoryWin, i, 13, "........");
+        write_window(memoryWin, i, 24, "........");
+        write_window(memoryWin, i, 35, "........");
+    }
+    write_window(memoryWin, 44, 1, "----- Block8 -----");
+    for (int i=45; i<=48; i++) {
+        write_window(memoryWin, i, 2, "........");
+        write_window(memoryWin, i, 13, "........");
+        write_window(memoryWin, i, 24, "........");
+        write_window(memoryWin, i, 35, "........");
+    }
 
 
     //create pthreads

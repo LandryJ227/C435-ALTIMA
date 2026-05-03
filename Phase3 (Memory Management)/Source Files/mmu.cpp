@@ -315,6 +315,7 @@ int mmu::Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *
                 travel_block = travel_block->nextBlock;
             }
 
+
             int block_lb = offset_from_beg;
             int block_ub = offset_from_beg + text_size; //we will write only the text_size amount.
             int mem_lb = block_lb + start_block->start_address;

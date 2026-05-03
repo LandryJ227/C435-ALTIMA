@@ -41,17 +41,21 @@ public:
 
     mmu(int size, char default_initial_value, int page_size, semaphore* memSem, scheduler* s);//DONE
     //~mmu();//DONE
-    int Mem_Alloc(int size, int task_id);//Julio
-    int Mem_Free(int memory_handle);//Ryan
+    int Mem_Alloc(int size, int task_id, WINDOW* win, WINDOW* memWin);//Julio
+    int Mem_Free(int memory_handle, WINDOW* win);//Ryan
     int Mem_Read(int memory_handle, char* ch);//Ryan
-    int Mem_Write(int memory_handle, char ch);//Ryan
+    int Mem_Write(int memory_handle, char ch, WINDOW* win);//Ryan
     int Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *text); // Ryan
-    int Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *text);// Ryan
+    int Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *text, WINDOW* win);// Ryan
     int Mem_Left();//Julio
     int Mem_Largest();//Julio
     int Mem_Smallest();//Julio
     int Mem_Coalesce();//DONE
     int Mem_Dump(int starting_from, int num_bytes);//DONE
+    void updateMemoryWin(WINDOW* win, int memPos, char data);
+
+    int memWriteLine = 3;
+    char buf[256];
 };
 
 

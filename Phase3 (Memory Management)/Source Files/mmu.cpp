@@ -1,5 +1,6 @@
 #include "mmu.h"
 #include <iostream>
+#include "Ultima.h"
 using namespace std;
 class block;
 
@@ -32,7 +33,7 @@ mmu::mmu(int size, char default_initial_value, int page_size, semaphore* memSem,
     block0 = new block(currentHandle, currentHandle * page_size, block1);
 }
 
-int mmu::Mem_Alloc(int size, int task_id) {
+int mmu::Mem_Alloc(int size, int task_id, WINDOW* win, WINDOW* memWin) {
     // Author: Julio
 
     int numOfBlocksNeeded = size / BLOCK_SIZE;
@@ -61,9 +62,13 @@ int mmu::Mem_Alloc(int size, int task_id) {
                 }
 
                 int handle = startBlock->handle;
-                cout << "Successfully allocated to Block " << handle << endl;
 
-                
+                int allocWriteLine = (handle*6)+2;
+                snprintf(buf, sizeof(buf), "Allocated to task %d", task_id);
+                write_window(memWin, allocWriteLine, 21, buf);
+
+                snprintf(buf, sizeof(buf), "Successfully allocated to Block %d", handle);
+                write_window(win, memWriteLine++, 1, buf);
                 //memorySema->up(win, dumpWin);
                 return handle;
             }
@@ -79,11 +84,11 @@ int mmu::Mem_Alloc(int size, int task_id) {
     }
 
     //memorySema->up(win, dumpWin);
-    cerr << "ERROR. NOT ENOUGH RAM AVAILABLE." << endl;
+    //cerr << "ERROR. NOT ENOUGH RAM AVAILABLE." << endl;
     return -1;
 }
 
-int mmu::Mem_Free(int memory_handle) {
+int mmu::Mem_Free(int memory_handle, WINDOW* win) {
     // Author: Ryan
     int block_start;
     block* blockPTR = block0;
@@ -98,8 +103,9 @@ int mmu::Mem_Free(int memory_handle) {
             blockPTR->task_id = -1;
             for (int i = block_start; i-block_start < blockPTR->SIZE && i<mmu::RAM_SIZE; i++) {
                 mmu::mainMem[i] = '#';
+                updateMemoryWin(win, i, '#');
             }
-            return 0;
+            //return 0;
         }
         blockPTR = blockPTR->nextBlock;
     }
@@ -150,7 +156,7 @@ int mmu::Mem_Largest() {
 
     // Convert block count to byte size and print result
     int sizeLargest = largest * BLOCK_SIZE;
-    cout << "The largest available memory segment is " << sizeLargest << " bytes" << endl;
+    //cout << "The largest available memory segment is " << sizeLargest << " bytes" << endl;
     return largest;
 
 }
@@ -182,12 +188,12 @@ int mmu::Mem_Smallest() {
 
     // If the smallest hole is still 8, 
     if (smallest == 8 && Mem_Left() == 0) { 
-        cout << "There are no free blocks available." << endl;
+        //cout << "There are no free blocks available." << endl;
         return 0; // no free blocks
     }
 
     int sizeSmallest = smallest * BLOCK_SIZE;
-    cout << "The smallest available memory segment is " << sizeSmallest << " bytes" << endl;
+    //cout << "The smallest available memory segment is " << sizeSmallest << " bytes" << endl;
     return smallest;
 
 }
@@ -200,10 +206,10 @@ int mmu::Mem_Dump(int starting_from, int num_bytes) {
     }
     for (int i = starting_from; i < starting_from + num_bytes; i++) {
         if (i % 20 == 0 && i != 0 ) { //every 20 prints -> new line. can change to whatever.
-            cout << mmu::mainMem[i] << endl;
+            //cout << mmu::mainMem[i] << endl;
         }
         else {
-            cout << mmu::mainMem[i];
+            //cout << mmu::mainMem[i];
         }
     }
     return 0;
@@ -234,7 +240,7 @@ int mmu::Mem_Read(int memory_handle, char* ch) {
     return -1;
 }
 
-int mmu::Mem_Write(int memory_handle, char ch) {
+int mmu::Mem_Write(int memory_handle, char ch, WINDOW* win) {
     // Author: Ryan
     block* current_block = block0;
 
@@ -249,6 +255,7 @@ int mmu::Mem_Write(int memory_handle, char ch) {
                 (mem_index < mmu::RAM_SIZE && mem_index >= 0)){ //In mem bounds
                     mainMem[mem_index] = ch;
                     current_block->current_position++;
+                    updateMemoryWin(win, mem_index, ch);
                     return 0;
                 }
             else return -1;
@@ -296,7 +303,7 @@ int mmu::Mem_Read(int memory_handle, int offset_from_beg, int text_size, char *t
     return -1;
 }
 
-int mmu::Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *text) {
+int mmu::Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *text, WINDOW* win) {
     // Author: Ryan
     if (text_size < 0 || text == nullptr) return -1;
 
@@ -327,6 +334,7 @@ int mmu::Mem_Write(int memory_handle, int offset_from_beg, int text_size, char *
                 && (mem_ub <= mmu::RAM_SIZE && mem_lb >= 0)) {
                 for (int i = 0; i < text_size; i++) {
                     mainMem[mem_lb + i] = text[i];
+                    updateMemoryWin(win, mem_lb+i, text[i]);
                 }
                 return 0;
                 }
@@ -354,73 +362,27 @@ int mmu::Mem_Coalesce() { //Since we used fixed block sizes coalesce loses the c
     return 0;
 }
 
-int main() {
-        // Authors: Julio, Ryan, and Jacob
+void mmu::updateMemoryWin(WINDOW* win, int memPos, char data) {
+    int memRow;
+    int memCol;
 
-    semaphore* memorySema;
-    scheduler* sched;
-    mmu memory(1024, '.', 128, memorySema, sched);
-    //cout << memory.block3->handle << endl;
-    //cout << memory.block3->start_address << endl;
-    //cout << memory.block3->current_position << endl;
-    //cout << memory.block3->is_free << endl;
-    //out << memory.block3->task_id << endl;
-    int large = memory.Mem_Largest();
-    int small = memory.Mem_Smallest();
-    int handle1 = memory.Mem_Alloc(400,1);
-    large = memory.Mem_Largest();
-    int handle2 = memory.Mem_Alloc(200,2);
-    small = memory.Mem_Smallest();
-    int handle3 = memory.Mem_Alloc(800,3);
-    int memleft = memory.Mem_Left();
-    cout << "There are currently " << memleft << " bytes available." << endl;
-    int handle4 = memory.Mem_Alloc(100,4);
-    int handle5 = memory.Mem_Alloc(100,5);
-    int memleft2 = memory.Mem_Left();
-    memory.Mem_Dump(0, 129);
-    small = memory.Mem_Smallest();
+    memRow = memPos / 32;
+    memCol = memPos % 32;
 
+    if (memRow <= 3) memRow += 3;
+    else if (memRow <=7) memRow += 5;
+    else if (memRow <=11) memRow += 7;
+    else if (memRow <=15) memRow += 9;
+    else if (memRow <=19) memRow += 11;
+    else if (memRow <=23) memRow += 13;
+    else if (memRow <=27) memRow += 15;
+    else if (memRow <=31) memRow += 17;
 
-    memory.Mem_Coalesce();
+    if (memCol <= 7) memCol += 2;
+    else if (memCol <= 15) memCol += 5;
+    else if (memCol <= 23) memCol += 8;
+    else if (memCol <= 31) memCol +=11;
 
-    //### Writing to Block 1
-    cout << "Writing to current positon in handle 4" << endl;
-    const int text_size = 13;
-    char text[text_size] = "Hello ultima";
-    char writer;
-    char *p = &writer;
-    if (memory.Mem_Write(handle1, 200, text_size,text) ==-1) cout<<"Write error" <<endl;
-    writer = 'h';
-    memory.Mem_Write(handle1, *p);
-    writer = 'e';
-    if (memory.Mem_Write(handle1, *p)==-1) cout<<"error"<<endl;
-    writer = 'l';
-    memory.Mem_Write(handle1, *p);
-    writer = 'l';
-    memory.Mem_Write(handle1, *p);
-    writer = 'o';
-    memory.Mem_Write(handle1, *p);
-    cout << "Reading from handle 5" << endl;
-    char text_big[400];
-    char text_new[128];
-    if (memory.Mem_Read(handle1, 0, 350, text_big)==-1) {
-        cout<<"Read error !!" << endl;
-    }
-    else {
-        cout<<text_big<<endl;
-    }
-    memory.Mem_Dump(0,1023);
-
-    //### Freeing block 1
-    cout<<"freeing"<<endl;
-    int free_success = memory.Mem_Free(handle1);
-    int memleft3 = memory.Mem_Left();
-    memory.Mem_Dump(0, 129);
-    cout<<endl << "reading" <<endl;
-
-
-
-
-    cout<<"bye"<<endl;
-    return 1;
+    char buf[2] = { (char)data, '\0' };
+    write_window(win, memRow, memCol, buf);
 }
